@@ -5,763 +5,444 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>小高的麻衣相法遊戲屋 - 面相分析工具</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
-            color: white;
-            min-height: 100vh;
-            padding: 20px;
-            background-attachment: fixed;
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: rgba(0, 0, 30, 0.85);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
-            border: 1px solid #4f8bf9;
-        }
-        
-        header {
-            background: rgba(0, 20, 60, 0.9);
-            padding: 25px;
-            text-align: center;
-            border-bottom: 3px solid #4f8bf9;
-            position: relative;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: #4f8bf9;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .main-content {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 20px;
-        }
-        
-        .upload-section {
-            flex: 1;
-            min-width: 300px;
-            padding: 20px;
-            background: rgba(10, 25, 60, 0.7);
-            border-radius: 15px;
-            margin: 10px;
-        }
-        
-        .result-section {
-            flex: 1;
-            min-width: 300px;
-            padding: 20px;
-            background: rgba(10, 25, 60, 0.7);
-            border-radius: 15px;
-            margin: 10px;
-        }
-        
-        h2 {
-            color: #4f8bf9;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #4f8bf9;
-        }
-        
-        .upload-area {
-            border: 3px dashed #4f8bf9;
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
-            background: rgba(20, 40, 80, 0.4);
-        }
-        
-        .upload-area:hover {
-            background: rgba(30, 60, 120, 0.5);
-            transform: translateY(-3px);
-        }
-        
-        .upload-icon {
-            font-size: 4rem;
-            margin-bottom: 15px;
-            color: #4f8bf9;
-        }
-        
-        .btn {
-            background: linear-gradient(to right, #4f8bf9, #6a5af9);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            font-size: 1.1rem;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: block;
-            width: 100%;
-            margin: 20px 0;
-            font-weight: bold;
-            letter-spacing: 1px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-        }
-        
-        .btn:active {
-            transform: translateY(1px);
-        }
-        
-        .btn:disabled {
-            background: #555;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        #imagePreview {
-            max-width: 100%;
-            max-height: 500px;
-            border-radius: 10px;
-            background: #0a1429;
-            margin-top: 15px;
-            display: none;
-            border: 2px solid #4f8bf9;
-            object-fit: contain; /* 保持圖片比例 */
-        }
-        
-        .result-box {
-            background: rgba(20, 40, 80, 0.4);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-            border: 2px solid #4f8bf9;
-        }
-        
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(79, 139, 249, 0.3);
-        }
-        
-        .result-item:last-child {
-            border-bottom: none;
-        }
-        
-        .progress-container {
-            height: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            margin: 10px 0 20px;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(to right, #4f8bf9, #6a5af9);
-            border-radius: 10px;
-            width: 0%;
-            transition: width 1s ease-in-out;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 30px;
-            display: none;
-        }
-        
-        .spinner {
-            border: 5px solid rgba(79, 139, 249, 0.3);
-            border-top: 5px solid #4f8bf9;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        footer {
-            text-align: center;
-            padding: 20px;
-            background: rgba(0, 20, 60, 0.9);
-            margin-top: 20px;
-            border-top: 1px solid #4f8bf9;
-        }
-        
-        .note {
-            font-size: 0.9rem;
-            opacity: 0.7;
-            margin-top: 5px;
-        }
-        
-        .marker-instructions {
-            background: rgba(20, 40, 80, 0.4);
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            border-left: 4px solid #4f8bf9;
-        }
-        
-        .marker-instructions ol {
-            padding-left: 20px;
-            margin: 10px 0;
-        }
-        
-        .marker-instructions li {
-            margin-bottom: 8px;
-        }
-        
-        .point-marker {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: red;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-        }
-        
-        .point-label {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-            transform: translate(10px, -10px);
-            z-index: 10;
-        }
-        
-        .image-container {
-            position: relative;
-            display: inline-block;
-            margin: 10px 0;
-            max-width: 100%;
-            text-align: center;
-        }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-        }
-        
-        .interpretation {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(20, 40, 80, 0.4);
-            border-radius: 10px;
-            border-left: 4px solid #4f8bf9;
-        }
-        
-        .interpretation h3 {
-            color: #4f8bf9;
-            margin-bottom: 10px;
-        }
-        
-        .interpretation p {
-            margin-bottom: 10px;
-        }
-        
-        .sample-images {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            margin-top: 20px;
-            gap: 15px;
-        }
-        
-        .sample-image {
-            width: 120px;
-            height: 120px;
-            border-radius: 10px;
-            cursor: pointer;
-            border: 2px solid #4f8bf9;
-            object-fit: cover;
-            transition: all 0.3s;
-        }
-        
-        .sample-image:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        
-        .sample-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-        
-        .decoration {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 2.5rem;
-            opacity: 0.5;
-        }
-        
-        .game-house-title {
-            color: #ffcc00;
-            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
-        }
-        
-        .ratio-fix-note {
-            color: #ffcc00;
-            font-size: 0.9rem;
-            margin-top: 10px;
-            display: block;
-        }
+        /* ---------- 版面與配色 ---------- */
+        *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI','Microsoft JhengHei',sans-serif;}
+        body{background:linear-gradient(135deg,#1a2a6c,#b21f1f,#1a2a6c);color:#fff;min-height:100vh;padding:20px;background-attachment:fixed;}
+        .container{max-width:1000px;margin:0 auto;background:rgba(0,0,30,.85);border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.5);overflow:hidden;border:1px solid #4f8bf9;}
+        header{background:rgba(0,20,60,.9);padding:25px;text-align:center;border-bottom:3px solid #4f8bf9;position:relative;}
+        h1{font-size:2.5rem;margin-bottom:10px;color:#4f8bf9;text-shadow:0 2px 4px rgba(0,0,0,.5);}
+        .subtitle{font-size:1.2rem;opacity:.9;max-width:600px;margin:0 auto;}
+        .main-content{display:flex;flex-wrap:wrap;padding:20px;}
+        .upload-section,.result-section{flex:1;min-width:300px;padding:20px;background:rgba(10,25,60,.7);border-radius:15px;margin:10px;}
+        h2{color:#4f8bf9;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #4f8bf9;}
+        .upload-area{border:3px dashed #4f8bf9;border-radius:15px;padding:30px;text-align:center;cursor:pointer;transition:.3s;margin-bottom:20px;background:rgba(20,40,80,.4);}
+        .upload-area:hover{background:rgba(30,60,120,.5);transform:translateY(-3px);}
+        .upload-icon{font-size:4rem;margin-bottom:15px;color:#4f8bf9;}
+        .btn{background:linear-gradient(to right,#4f8bf9,#6a5af9);color:#fff;border:none;padding:14px 28px;font-size:1.1rem;border-radius:50px;cursor:pointer;transition:.3s;display:block;width:100%;margin:20px 0;font-weight:bold;letter-spacing:1px;box-shadow:0 5px 15px rgba(0,0,0,.3);}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.4);}
+        .btn:active{transform:translateY(1px);}
+        .btn:disabled{background:#555;cursor:not-allowed;transform:none;box-shadow:none;}
+        #imagePreview{max-width:100%;max-height:500px;border-radius:10px;background:#0a1429;margin-top:15px;display:none;border:2px solid #4f8bf9;object-fit:contain;}
+        .result-box{background:rgba(20,40,80,.4);border-radius:15px;padding:20px;margin-top:20px;border:2px solid #4f8bf9;}
+        .result-item{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(79,139,249,.3);}
+        .result-item:last-child{border-bottom:none;}
+        .progress-container{height:20px;background:rgba(0,0,0,.3);border-radius:10px;margin:10px 0 20px;overflow:hidden;}
+        .progress-bar{height:100%;background:linear-gradient(to right,#4f8bf9,#6a5af9);border-radius:10px;width:0%;transition:width 1s ease-in-out;}
+        footer{text-align:center;padding:20px;background:rgba(0,20,60,.9);margin-top:20px;border-top:1px solid #4f8bf9;}
+        .note{font-size:.9rem;opacity:.7;margin-top:5px;}
+        .marker-instructions{background:rgba(20,40,80,.4);border-radius:10px;padding:15px;margin:15px 0;border-left:4px solid #4f8bf9;}
+        .marker-instructions ol{padding-left:20px;margin:10px 0;}
+        .marker-instructions li{margin-bottom:8px;}
+        .point-marker{position:absolute;width:12px;height:12px;border-radius:50%;background:red;transform:translate(-50%,-50%);z-index:10;}
+        .point-label{position:absolute;background:rgba(0,0,0,.7);color:#fff;padding:2px 6px;border-radius:4px;font-size:12px;transform:translate(10px,-10px);z-index:10;}
+        .image-container{position:relative;display:inline-block;margin:10px 0;max-width:100%;text-align:center;}
+        @media(max-width:768px){.main-content{flex-direction:column;}h1{font-size:2rem;}}
+        .interpretation{margin-top:20px;padding:15px;background:rgba(20,40,80,.4);border-radius:10px;border-left:4px solid #4f8bf9;}
+        .interpretation h3{color:#4f8bf9;margin-bottom:10px;}
+        .interpretation p{margin-bottom:10px;}
+        .sample-images{display:flex;justify-content:space-around;flex-wrap:wrap;margin-top:20px;gap:15px;}
+        .sample-image{width:120px;height:120px;border-radius:10px;cursor:pointer;border:2px solid #4f8bf9;object-fit:cover;transition:.3s;}
+        .sample-image:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(0,0,0,.3);}
+        .sample-container{text-align:center;margin-top:20px;}
+        .decoration{position:absolute;top:20px;right:20px;font-size:2.5rem;opacity:.5;}
+        .game-house-title{color:#ffcc00;text-shadow:0 0 10px rgba(255,204,0,.5);}
+        .ratio-fix-note{color:#ffcc00;font-size:.9rem;margin-top:10px;display:block;}
+        .point-number{position:absolute;color:white;font-size:10px;font-weight:bold;left:50%;top:50%;transform:translate(-50%, -50%);z-index:11;}
+        .success-message{color:#4f8bf9;font-weight:bold;margin-top:10px;display:none;}
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1><span class="game-house-title">小高的麻衣相法遊戲屋</span></h1>
-            <p class="subtitle">面相分析工具 - 手動標記點版本</p>
-            <div class="decoration">☯</div>
-        </header>
-        
-        <div class="main-content">
-            <div class="upload-section">
-                <h2>上傳照片</h2>
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">📷</div>
-                    <p>點擊或拖放面部照片到這裡</p>
-                    <p class="note">(正面清晰照片效果最佳)</p>
-                    <span class="ratio-fix-note">✓ 已修復圖片比例問題</span>
-                    <input type="file" id="fileInput" accept="image/*" style="display:none;">
-                </div>
-                
-                <div class="marker-instructions">
-                    <p><strong>標記步驟：</strong></p>
-                    <ol>
-                        <li>點擊<strong>髮際線中點</strong>（額頭頂部中央）</li>
-                        <li>點擊<strong>眉心位置</strong>（兩眉之間）</li>
-                        <li>點擊<strong>鼻下點</strong>（鼻孔下方）</li>
-                        <li>點擊<strong>下巴尖</strong>（下巴最底部）</li>
-                    </ol>
-                    <p>標記完成後點擊"計算比例"按鈕</p>
-                </div>
-                
-                <button class="btn" id="calculateBtn" disabled>計算比例</button>
-                <button class="btn" id="resetBtn">重置標記點</button>
-                
-                <div id="imageContainer" class="image-container">
-                    <img id="imagePreview" alt="面部照片預覽">
-                </div>
-                
-                <div class="sample-container">
-                    <h3>範例圖片</h3>
-                    <p class="note">點擊下方範例圖片快速體驗分析功能</p>
-                    <div class="sample-images">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&w=200" 
-                             alt="範例1" class="sample-image" id="sample1">
-                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&w=200" 
-                             alt="範例2" class="sample-image" id="sample2">
-                        <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&w=200" 
-                             alt="範例3" class="sample-image" id="sample3">
-                    </div>
-                </div>
+<div class="container">
+    <header>
+        <h1><span class="game-house-title">小高的麻衣相法遊戲屋</span></h1>
+        <p class="subtitle">面相分析工具 - 手動標記點版本</p>
+        <div class="decoration">☯</div>
+    </header>
+
+    <div class="main-content">
+        <!-- ▲▲ 上傳區 ▲▲ -->
+        <div class="upload-section">
+            <h2>上傳照片</h2>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📷</div>
+                <p>點擊或拖放面部照片到這裡</p>
+                <p class="note">(正面清晰照片效果最佳)</p>
+                <span class="ratio-fix-note">✓ 已修復圖片比例問題</span>
+                <input type="file" id="fileInput" accept="image/*" style="display:none;">
             </div>
-            
-            <div class="result-section">
-                <h2>分析結果</h2>
-                <div class="result-box" id="resultBox" style="display:none;">
-                    <div class="result-item">
-                        <span>上庭比例（額頭）</span>
-                        <span id="upperRatio">--%</span>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" id="upperBar"></div>
-                    </div>
-                    
-                    <div class="result-item">
-                        <span>中庭比例（眉眼鼻）</span>
-                        <span id="middleRatio">--%</span>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" id="middleBar"></div>
-                    </div>
-                    
-                    <div class="result-item">
-                        <span>下庭比例（口下巴）</span>
-                        <span id="lowerRatio">--%</span>
-                    </div>
-                    <div class="progress-container">
-                        <div class="progress-bar" id="lowerBar"></div>
-                    </div>
-                    
-                    <div class="result-item">
-                        <span><strong>三庭失衡係數</strong></span>
-                        <span id="imbalanceValue">--%</span>
-                    </div>
-                    <div class="result-item">
-                        <span>黃金比例偏差</span>
-                        <span id="goldenDeviation">--%</span>
-                    </div>
-                    
-                    <div class="interpretation" id="interpretation">
-                        <h3>面相解讀</h3>
-                        <p>請上傳照片並標記點後查看面相解讀</p>
-                    </div>
-                </div>
-                
-                <div id="initialMessage">
-                    <p>上傳面部照片後，按照指示標記四個關鍵點。</p>
-                    <p class="note">本工具完全在瀏覽器中運行，不上傳任何數據到伺服器。</p>
+
+            <div class="marker-instructions">
+                <p><strong>標記步驟：</strong></p>
+                <ol>
+                    <li>點擊<strong>髮際線中點</strong>（額頭頂部中央）</li>
+                    <li>點擊<strong>眉心位置</strong>（兩眉之間）</li>
+                    <li>點擊<strong>鼻下點</strong>（鼻孔下方）</li>
+                    <li>點擊<strong>下巴尖</strong>（下巴最底部）</li>
+                </ol>
+                <p>標記完成後點擊「計算比例」</p>
+                <p class="success-message" id="successMessage">✓ 標記點已設置完成，請點擊計算比例</p>
+            </div>
+
+            <button class="btn" id="calculateBtn" disabled>計算比例</button>
+            <button class="btn" id="resetBtn">重置標記點</button>
+
+            <div id="imageContainer" class="image-container">
+                <img id="imagePreview" alt="面部照片預覽">
+            </div>
+
+            <!-- 範例圖片 -->
+            <div class="sample-container">
+                <h3>範例圖片</h3>
+                <p class="note">點擊下方範例圖片快速體驗分析功能</p>
+                <div class="sample-images">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&w=200" alt="範例1" class="sample-image" id="sample1">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&w=200" alt="範例2" class="sample-image" id="sample2">
+                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&w=200" alt="範例3" class="sample-image" id="sample3">
                 </div>
             </div>
         </div>
-        
-        <footer>
-            <p>小高的麻衣相法遊戲屋 v1.1 | 繁體版</p>
-            <p class="note">注意：本工具僅供娛樂參考，實際面相分析需專業人士進行</p>
-        </footer>
+
+        <!-- ▲▲ 結果區 ▲▲ -->
+        <div class="result-section">
+            <h2>分析結果</h2>
+            <div class="result-box" id="resultBox" style="display:none;">
+                <div class="result-item">
+                    <span>上庭比例（額頭）</span><span id="upperRatio">--%</span>
+                </div>
+                <div class="progress-container"><div class="progress-bar" id="upperBar"></div></div>
+
+                <div class="result-item">
+                    <span>中庭比例（眉眼鼻）</span><span id="middleRatio">--%</span>
+                </div>
+                <div class="progress-container"><div class="progress-bar" id="middleBar"></div></div>
+
+                <div class="result-item">
+                    <span>下庭比例（口下巴）</span><span id="lowerRatio">--%</span>
+                </div>
+                <div class="progress-container"><div class="progress-bar" id="lowerBar"></div></div>
+
+                <div class="result-item">
+                    <span><strong>三庭失衡係數</strong></span><span id="imbalanceValue">--%</span>
+                </div>
+                <div class="result-item">
+                    <span>黃金比例偏差</span><span id="goldenDeviation">--%</span>
+                </div>
+
+                <div class="interpretation" id="interpretation">
+                    <h3>面相解讀</h3>
+                    <p>請上傳照片並標記點後查看面相解讀</p>
+                </div>
+            </div>
+
+            <div id="initialMessage">
+                <p>上傳面部照片後，按照指示標記四個關鍵點。</p>
+                <p class="note">本工具完全在瀏覽器中運行，不會上傳任何資料至伺服器。</p>
+            </div>
+        </div>
     </div>
 
-    <script>
-        // 頁面元素
-        const fileInput = document.getElementById('fileInput');
-        const uploadArea = document.getElementById('uploadArea');
-        const imagePreview = document.getElementById('imagePreview');
-        const imageContainer = document.getElementById('imageContainer');
-        const calculateBtn = document.getElementById('calculateBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const resultBox = document.getElementById('resultBox');
-        const initialMessage = document.getElementById('initialMessage');
-        const interpretation = document.getElementById('interpretation');
+    <footer>
+        <p>小高的麻衣相法遊戲屋 v1.1 | 繁體版</p>
+        <p class="note">注意：本工具僅供娛樂參考，實際面相分析需專業人士進行</p>
+    </footer>
+</div>
+
+<!-- ---------- 主程式 ---------- -->
+<script>
+/* ==== 取得 DOM ==== */
+const fileInput       = document.getElementById('fileInput');
+const uploadArea      = document.getElementById('uploadArea');
+const imagePreview    = document.getElementById('imagePreview');
+const imageContainer  = document.getElementById('imageContainer');
+const calculateBtn    = document.getElementById('calculateBtn');
+const resetBtn        = document.getElementById('resetBtn');
+const resultBox       = document.getElementById('resultBox');
+const initialMessage  = document.getElementById('initialMessage');
+const interpretation  = document.getElementById('interpretation');
+const upperRatio      = document.getElementById('upperRatio');
+const middleRatio     = document.getElementById('middleRatio');
+const lowerRatio      = document.getElementById('lowerRatio');
+const upperBar        = document.getElementById('upperBar');
+const middleBar       = document.getElementById('middleBar');
+const lowerBar        = document.getElementById('lowerBar');
+const imbalanceValue  = document.getElementById('imbalanceValue');
+const goldenDeviation = document.getElementById('goldenDeviation');
+const successMessage  = document.getElementById('successMessage');
+const sample1         = document.getElementById('sample1');
+const sample2         = document.getElementById('sample2');
+const sample3         = document.getElementById('sample3');
+
+/* ==== 全域變數 ==== */
+let markers = []; // 存儲標記點
+let imageLoaded = false; // 圖片是否已加載
+
+/* ==== 事件監聽 ==== */
+// 點擊上傳區域觸發文件選擇
+uploadArea.addEventListener('click', () => {
+    fileInput.click();
+});
+
+// 文件選擇事件
+fileInput.addEventListener('change', handleFileSelect);
+
+// 拖放功能
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.style.background = 'rgba(30, 60, 120, 0.5)';
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.style.background = 'rgba(20,40,80,.4)';
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.background = 'rgba(20,40,80,.4)';
+    
+    if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFileSelect(e);
+    }
+});
+
+// 計算按鈕
+calculateBtn.addEventListener('click', calculateRatios);
+
+// 重置按鈕
+resetBtn.addEventListener('click', resetMarkers);
+
+// 範例圖片點擊
+sample1.addEventListener('click', () => loadSampleImage('sample1'));
+sample2.addEventListener('click', () => loadSampleImage('sample2'));
+sample3.addEventListener('click', () => loadSampleImage('sample3'));
+
+/* ==== 函數定義 ==== */
+// 處理文件選擇
+function handleFileSelect(e) {
+    const file = fileInput.files[0];
+    if (!file || !file.type.match('image.*')) {
+        alert('請選擇有效的圖片文件！');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block';
+        imageLoaded = true;
         
-        // 結果元素
-        const upperRatio = document.getElementById('upperRatio');
-        const middleRatio = document.getElementById('middleRatio');
-        const lowerRatio = document.getElementById('lowerRatio');
-        const imbalanceValue = document.getElementById('imbalanceValue');
-        const goldenDeviation = document.getElementById('goldenDeviation');
-        const upperBar = document.getElementById('upperBar');
-        const middleBar = document.getElementById('middleBar');
-        const lowerBar = document.getElementById('lowerBar');
-        
-        // 標記點陣列
-        const points = [];
-        let currentImage = null;
-        let originalWidth = 0;
-        let originalHeight = 0;
-        
-        // 上傳區域點擊事件
-        uploadArea.addEventListener('click', () => {
-            fileInput.click();
-        });
-        
-        // 拖放功能
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = 'rgba(50, 100, 180, 0.6)';
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.background = 'rgba(20, 40, 80, 0.4)';
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = 'rgba(20, 40, 80, 0.4)';
-            
-            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                fileInput.files = e.dataTransfer.files;
-                handleFileSelect();
-            }
-        });
-        
-        // 文件選擇事件
-        fileInput.addEventListener('change', handleFileSelect);
-        
-        function handleFileSelect() {
-            if (fileInput.files && fileInput.files[0]) {
-                const file = fileInput.files[0];
-                
-                // 檢查文件類型
-                if (!file.type.match('image.*')) {
-                    alert('請上傳圖片文件');
-                    return;
-                }
-                
-                const reader = new FileReader();
-                
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        // 清除之前的標記點
-                        clearMarkers();
-                        
-                        // 顯示圖片
-                        imagePreview.src = event.target.result;
-                        imagePreview.style.display = 'block';
-                        
-                        // 保存原始尺寸
-                        originalWidth = img.width;
-                        originalHeight = img.height;
-                        
-                        // 移除寬高設置，讓CSS控制比例
-                        imagePreview.removeAttribute('width');
-                        imagePreview.removeAttribute('height');
-                        
-                        currentImage = img;
-                        calculateBtn.disabled = false;
-                    };
-                    img.src = event.target.result;
-                };
-                
-                reader.readAsDataURL(file);
-            }
-        }
-        
-        // 點擊圖片添加標記點
-        imagePreview.addEventListener('click', (e) => {
-            if (!currentImage) return;
-            
-            // 獲取點擊坐標
-            const rect = imagePreview.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            // 最多只能標記4個點
-            if (points.length >= 4) {
-                alert('已經標記了4個關鍵點，請點擊"重置標記點"重新標記');
-                return;
-            }
-            
-            // 添加標記點
-            const pointIndex = points.length;
-            createMarker(x, y, pointIndex);
-            
-            // 保存坐標
-            points.push({
-                x: (x / rect.width) * originalWidth,
-                y: (y / rect.height) * originalHeight
-            });
-            
-            // 如果有4個點，可以計算比例
-            if (points.length === 4) {
-                calculateBtn.disabled = false;
-            }
-        });
-        
-        // 創建標記點
-        function createMarker(x, y, index) {
-            const labels = ['髮際線', '眉心', '鼻下點', '下巴'];
-            
-            // 創建標記點
-            const marker = document.createElement('div');
-            marker.className = 'point-marker';
-            marker.style.left = `${x}px`;
-            marker.style.top = `${y}px`;
-            
-            // 創建標籤
-            const label = document.createElement('div');
-            label.className = 'point-label';
-            label.textContent = `${index+1}. ${labels[index]}`;
-            label.style.left = `${x}px`;
-            label.style.top = `${y}px`;
-            
-            imageContainer.appendChild(marker);
-            imageContainer.appendChild(label);
-        }
-        
-        // 清除所有標記點
-        function clearMarkers() {
-            // 清除所有標記
-            const markers = document.querySelectorAll('.point-marker, .point-label');
-            markers.forEach(marker => marker.remove());
-            
-            // 清空坐標陣列
-            points.length = 0;
-        }
-        
-        // 重置標記點
-        resetBtn.addEventListener('click', () => {
-            clearMarkers();
-            calculateBtn.disabled = true;
-        });
-        
-        // 計算比例
-        calculateBtn.addEventListener('click', () => {
-            if (points.length !== 4) {
-                alert('請標記4個關鍵點');
-                return;
-            }
-            
-            // 計算三庭長度
-            const upper = points[1].y - points[0].y;
-            const middle = points[2].y - points[1].y;
-            const lower = points[3].y - points[2].y;
-            const total = upper + middle + lower;
-            
-            // 計算比例
-            const pct_upper = Math.round(upper / total * 100);
-            const pct_middle = Math.round(middle / total * 100);
-            const pct_lower = Math.round(lower / total * 100);
-            
-            // 計算失衡係數
-            const imbalance = Math.round(
-                (Math.max(upper, middle, lower) - Math.min(upper, middle, lower)) / 
-                Math.max(upper, middle, lower) * 100
-            );
-            
-            // 黃金比例偏差（理想比例33.3%）
-            const goldenDev = Math.round(
-                (Math.abs(pct_upper - 33.3) + 
-                 Math.abs(pct_middle - 33.3) + 
-                 Math.abs(pct_lower - 33.3)) / 3
-            );
-            
-            // 更新UI顯示結果
-            upperRatio.textContent = `${pct_upper}%`;
-            middleRatio.textContent = `${pct_middle}%`;
-            lowerRatio.textContent = `${pct_lower}%`;
-            imbalanceValue.textContent = `${imbalance}%`;
-            goldenDeviation.textContent = `${goldenDev}%`;
-            
-            // 進度條動畫
-            setTimeout(() => {
-                upperBar.style.width = `${pct_upper}%`;
-                middleBar.style.width = `${pct_middle}%`;
-                lowerBar.style.width = `${pct_lower}%`;
-            }, 500);
-            
-            // 顯示結果
-            resultBox.style.display = 'block';
-            initialMessage.style.display = 'none';
-            
-            // 更新面相解讀
-            updateInterpretation(pct_upper, pct_middle, pct_lower);
-        });
-        
-        // 更新面相解讀
-        function updateInterpretation(upper, middle, lower) {
-            let interpretationHTML = '<h3>面相解讀</h3>';
-            
-            // 上庭分析
-            if (upper > 37) {
-                interpretationHTML += '<p><strong>上庭（額頭）較長：</strong> 表示您有較強的智力發展和早年運勢。額頭寬廣象徵思維開闊，善於規劃，早年生活可能較為順利。</p>';
-            } else if (upper < 30) {
-                interpretationHTML += '<p><strong>上庭（額頭）較短：</strong> 代表早年發展可能較為辛苦，需更多努力。但中晚年運勢可能較好，屬於大器晚成的類型。</p>';
-            } else {
-                interpretationHTML += '<p><strong>上庭比例均衡：</strong> 象徵早年運勢平穩，智力發展正常，有良好的學習能力和思維邏輯。</p>';
-            }
-            
-            // 中庭分析
-            if (middle > 37) {
-                interpretationHTML += '<p><strong>中庭（眉眼鼻）較長：</strong> 代表您有強烈的事業心和責任感。中年時期是您的人生黃金期，可能在事業上有突出表現。</p>';
-            } else if (middle < 30) {
-                interpretationHTML += '<p><strong>中庭（眉眼鼻）較短：</strong> 象徵中年運勢相對平穩，可能更注重家庭和生活平衡，而非事業成就。</p>';
-            } else {
-                interpretationHTML += '<p><strong>中庭比例均衡：</strong> 代表中年運勢穩定，事業和生活能夠平衡發展，人際關係良好。</p>';
-            }
-            
-            // 下庭分析
-            if (lower > 37) {
-                interpretationHTML += '<p><strong>下庭（口下巴）較長：</strong> 象徵晚年運勢強盛，有持久的耐力和執行力。您可能擁有堅強的意志和持久的耐力。</p>';
-            } else if (lower < 30) {
-                interpretationHTML += '<p><strong>下庭（口下巴）較短：</strong> 代表行動力較強但持久力稍弱。晚年生活可能較為簡單平靜。</p>';
-            } else {
-                interpretationHTML += '<p><strong>下庭比例均衡：</strong> 象徵晚年生活平穩，人際關係和諧，能夠享受天倫之樂。</p>';
-            }
-            
-            // 綜合解讀
-            const deviation = Math.abs(upper - 33.3) + Math.abs(middle - 33.3) + Math.abs(lower - 33.3);
-            if (deviation < 10) {
-                interpretationHTML += '<p><strong>整體面相：</strong> 三庭比例非常均衡，象徵一生運勢平穩，各方面發展均衡，是較為理想的面相格局。</p>';
-            } else if (deviation < 20) {
-                interpretationHTML += '<p><strong>整體面相：</strong> 三庭比例較為均衡，人生雖有起伏但整體運勢平穩，能夠在不同階段有所成就。</p>';
-            } else {
-                interpretationHTML += '<p><strong>整體面相：</strong> 三庭比例有較明顯差異，人生各階段運勢起伏較大，但往往能在特定領域有突出表現。</p>';
-            }
-            
-            interpretation.innerHTML = interpretationHTML;
-        }
-        
-        // 範例圖片加載
-        document.querySelectorAll('.sample-image').forEach(img => {
-            img.addEventListener('click', function() {
-                // 創建範例圖片
-                const imgElement = new Image();
-                imgElement.crossOrigin = "Anonymous";
-                imgElement.onload = function() {
-                    // 清除之前的標記點
-                    clearMarkers();
-                    
-                    // 顯示圖片
-                    imagePreview.src = this.src;
-                    imagePreview.style.display = 'block';
-                    
-                    // 保存原始尺寸
-                    originalWidth = imgElement.width;
-                    originalHeight = imgElement.height;
-                    
-                    // 移除寬高設置，讓CSS控制比例
-                    imagePreview.removeAttribute('width');
-                    imagePreview.removeAttribute('height');
-                    
-                    currentImage = imgElement;
-                    calculateBtn.disabled = false;
-                    
-                    // 自動添加標記點（模擬用戶點擊）
-                    setTimeout(() => {
-                        const rect = imagePreview.getBoundingClientRect();
-                        
-                        // 根據範例圖片特徵添加標記點
-                        addSimulatedPoint(rect, 0.5, 0.15);  // 髮際線中點
-                        addSimulatedPoint(rect, 0.5, 0.35);  // 眉心
-                        addSimulatedPoint(rect, 0.5, 0.58);  // 鼻下點
-                        addSimulatedPoint(rect, 0.5, 0.85);  // 下巴尖
-                        
-                        calculateBtn.disabled = false;
-                    }, 500);
-                };
-                imgElement.src = this.src;
-            });
-        });
-        
-        // 添加模擬標記點
-        function addSimulatedPoint(rect, xPercent, yPercent) {
-            const x = rect.width * xPercent;
-            const y = rect.height * yPercent;
-            
-            createMarker(x, y, points.length);
-            
-            points.push({
-                x: (x / rect.width) * originalWidth,
-                y: (y / rect.height) * originalHeight
-            });
-        }
-    </script>
+        // 圖片加載完成後設置點擊事件
+        imagePreview.onload = () => {
+            resetMarkers();
+            imageContainer.addEventListener('click', handleImageClick);
+        };
+    };
+    reader.readAsDataURL(file);
+}
+
+// 處理圖片點擊（添加標記點）
+function handleImageClick(e) {
+    if (!imageLoaded || markers.length >= 4) return;
+    
+    // 獲取點擊位置相對於容器的座標
+    const rect = imageContainer.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // 創建標記點
+    createMarker(x, y, markers.length + 1);
+    
+    // 添加到標記點數組
+    markers.push({x, y, id: markers.length + 1});
+    
+    // 當標記點達到4個時啟用計算按鈕
+    if (markers.length === 4) {
+        calculateBtn.disabled = false;
+        successMessage.style.display = 'block';
+    }
+}
+
+// 創建標記點元素
+function createMarker(x, y, number) {
+    const marker = document.createElement('div');
+    marker.className = 'point-marker';
+    marker.style.left = `${x}px`;
+    marker.style.top = `${y}px`;
+    
+    const label = document.createElement('div');
+    label.className = 'point-number';
+    label.textContent = number;
+    
+    marker.appendChild(label);
+    imageContainer.appendChild(marker);
+}
+
+// 計算三庭比例
+function calculateRatios() {
+    if (markers.length < 4) {
+        alert('請先標記所有四個點！');
+        return;
+    }
+    
+    // 確保標記點按照順序排列（從上到下）
+    markers.sort((a, b) => a.y - b.y);
+    
+    // 計算各庭高度
+    const upperHeight = markers[1].y - markers[0].y;
+    const middleHeight = markers[2].y - markers[1].y;
+    const lowerHeight = markers[3].y - markers[2].y;
+    const totalHeight = markers[3].y - markers[0].y;
+    
+    // 計算比例
+    const upperPercent = Math.round((upperHeight / totalHeight) * 100);
+    const middlePercent = Math.round((middleHeight / totalHeight) * 100);
+    const lowerPercent = Math.round((lowerHeight / totalHeight) * 100);
+    
+    // 計算失衡係數（與理想33.3%的偏差總和）
+    const imbalance = Math.round(
+        Math.abs(upperPercent - 33.3) + 
+        Math.abs(middlePercent - 33.3) + 
+        Math.abs(lowerPercent - 33.3)
+    );
+    
+    // 計算黃金比例偏差（理想比例為1:1:1）
+    const goldenDev = Math.round(
+        Math.abs(upperPercent - 33.3) + 
+        Math.abs(middlePercent - 33.3) + 
+        Math.abs(lowerPercent - 33.3)
+    );
+    
+    // 更新UI
+    updateResults(upperPercent, middlePercent, lowerPercent, imbalance, goldenDev);
+    
+    // 顯示結果區域
+    resultBox.style.display = 'block';
+    initialMessage.style.display = 'none';
+}
+
+// 更新結果顯示
+function updateResults(upper, middle, lower, imbalance, goldenDev) {
+    upperRatio.textContent = `${upper}%`;
+    middleRatio.textContent = `${middle}%`;
+    lowerRatio.textContent = `${lower}%`;
+    imbalanceValue.textContent = `${imbalance}%`;
+    goldenDeviation.textContent = `${goldenDev}%`;
+    
+    // 設置進度條
+    upperBar.style.width = `${upper}%`;
+    middleBar.style.width = `${middle}%`;
+    lowerBar.style.width = `${lower}%`;
+    
+    // 生成解讀
+    generateInterpretation(upper, middle, lower, imbalance);
+}
+
+// 生成面相解讀
+function generateInterpretation(upper, middle, lower, imbalance) {
+    let interpretationHTML = '<h3>面相解讀</h3>';
+    
+    // 上庭解讀（額頭）
+    if (upper > 38) {
+        interpretationHTML += `<p>上庭比例較高 (${upper}%)：您擁有寬廣的額頭，代表早年運勢較佳，智力發展良好，有較強的邏輯思維能力。在事業上容易獲得貴人提攜，適合從事需要創意和思考的工作。</p>`;
+    } else if (upper < 28) {
+        interpretationHTML += `<p>上庭比例較低 (${upper}%)：您的額頭相對較窄，代表早年可能需要更多努力。但這也顯示您有務實的性格，腳踏實地，能夠通過後天努力彌補先天的不足。</p>`;
+    } else {
+        interpretationHTML += `<p>上庭比例均衡 (${upper}%)：您的額頭比例適中，代表早年運勢平穩，學習能力良好，家庭環境也較為穩定。</p>`;
+    }
+    
+    // 中庭解讀（眉眼鼻）
+    if (middle > 38) {
+        interpretationHTML += `<p>中庭比例較高 (${middle}%)：您的眉眼鼻區域較長，顯示中年運勢強勁。您可能有較強的事業心和領導能力，適合擔任管理職位。但需注意工作壓力可能對健康造成影響。</p>`;
+    } else if (middle < 28) {
+        interpretationHTML += `<p>中庭比例較低 (${middle}%)：您的中庭較短，代表中年運勢需要更多主動爭取。您可能更注重家庭生活，事業上需要更多耐心和堅持才能取得成功。</p>`;
+    } else {
+        interpretationHTML += `<p>中庭比例均衡 (${middle}%)：您的中庭比例適中，顯示中年運勢平穩，事業和家庭能夠保持良好平衡。</p>`;
+    }
+    
+    // 下庭解讀（口下巴）
+    if (lower > 38) {
+        interpretationHTML += `<p>下庭比例較高 (${lower}%)：您的下巴區域較長，代表晚年運勢良好，有福氣享受辛勤工作的成果。您可能有較強的意志力和決斷力，能夠堅持自己的目標。</p>`;
+    } else if (lower < 28) {
+        interpretationHTML += `<p>下庭比例較低 (${lower}%)：您的下巴較短，代表晚年需要更多生活規劃。您可能有較強的創造力和藝術天分，適合從事創意相關的工作。</p>`;
+    } else {
+        interpretationHTML += `<p>下庭比例均衡 (${lower}%)：您的下巴比例適中，代表晚年生活平穩，能夠享受天倫之樂。</p>`;
+    }
+    
+    // 整體解讀
+    if (imbalance < 20) {
+        interpretationHTML += `<p><strong>整體分析：</strong>您的三庭比例相當均衡 (失衡係數${imbalance}%)，代表一生運勢較為平穩，各方面發展較為均衡。這種面相顯示您性格穩定，處事周全，容易獲得他人的信任。</p>`;
+    } else if (imbalance > 40) {
+        interpretationHTML += `<p><strong>整體分析：</strong>您的三庭比例有較大差異 (失衡係數${imbalance}%)，代表人生可能會有較明顯的起伏階段。這種面相顯示您性格鮮明，有獨特的才華和創造力，適合在特定領域發展。</p>`;
+    } else {
+        interpretationHTML += `<p><strong>整體分析：</strong>您的三庭比例有一定差異 (失衡係數${imbalance}%)，代表人生會有不同的發展階段。這種面相顯示您適應能力強，能夠在不同環境中找到自己的位置。</p>`;
+    }
+    
+    interpretation.innerHTML = interpretationHTML;
+}
+
+// 重置標記點
+function resetMarkers() {
+    // 移除所有標記點
+    const markers = document.querySelectorAll('.point-marker');
+    markers.forEach(marker => marker.remove());
+    
+    // 重置數組
+    markers.length = 0;
+    
+    // 禁用計算按鈕
+    calculateBtn.disabled = true;
+    
+    // 隱藏成功消息
+    successMessage.style.display = 'none';
+    
+    // 重置結果顯示
+    if (resultBox.style.display === 'block') {
+        resultBox.style.display = 'none';
+        initialMessage.style.display = 'block';
+    }
+    
+    // 重置進度條
+    upperBar.style.width = '0%';
+    middleBar.style.width = '0%';
+    lowerBar.style.width = '0%';
+    
+    // 重置解讀
+    interpretation.innerHTML = '<h3>面相解讀</h3><p>請上傳照片並標記點後查看面相解讀</p>';
+}
+
+// 加載範例圖片
+function loadSampleImage(sampleId) {
+    // 設置對應的範例圖片
+    let sampleSrc = '';
+    switch(sampleId) {
+        case 'sample1':
+            sampleSrc = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=500&w=500';
+            break;
+        case 'sample2':
+            sampleSrc = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=500&w=500';
+            break;
+        case 'sample3':
+            sampleSrc = 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=500&w=500';
+            break;
+    }
+    
+    // 設置圖片源
+    imagePreview.src = sampleSrc;
+    imagePreview.style.display = 'block';
+    imageLoaded = true;
+    
+    // 重置標記點
+    resetMarkers();
+    
+    // 模擬圖片加載
+    imagePreview.onload = () => {
+        imageContainer.addEventListener('click', handleImageClick);
+        alert('範例圖片已加載，請按照指示標記四個點');
+    };
+}
+
+// 初始化
+resetMarkers();
+</script>
 </body>
 </html>
