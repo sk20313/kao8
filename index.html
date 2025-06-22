@@ -146,6 +146,7 @@
             margin-top: 15px;
             display: none;
             border: 2px solid #4f8bf9;
+            object-fit: contain; /* 保持圖片比例 */
         }
         
         .result-box {
@@ -260,6 +261,8 @@
             position: relative;
             display: inline-block;
             margin: 10px 0;
+            max-width: 100%;
+            text-align: center;
         }
         
         @media (max-width: 768px) {
@@ -329,6 +332,13 @@
             color: #ffcc00;
             text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
         }
+        
+        .ratio-fix-note {
+            color: #ffcc00;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -346,6 +356,7 @@
                     <div class="upload-icon">📷</div>
                     <p>點擊或拖放面部照片到這裡</p>
                     <p class="note">(正面清晰照片效果最佳)</p>
+                    <span class="ratio-fix-note">✓ 已修復圖片比例問題</span>
                     <input type="file" id="fileInput" accept="image/*" style="display:none;">
                 </div>
                 
@@ -431,7 +442,7 @@
         </div>
         
         <footer>
-            <p>小高的麻衣相法遊戲屋 v1.0 | 繁體版</p>
+            <p>小高的麻衣相法遊戲屋 v1.1 | 繁體版</p>
             <p class="note">注意：本工具僅供娛樂參考，實際面相分析需專業人士進行</p>
         </footer>
     </div>
@@ -518,13 +529,9 @@
                         originalWidth = img.width;
                         originalHeight = img.height;
                         
-                        // 調整預覽大小
-                        const maxWidth = 600;
-                        if (img.width > maxWidth) {
-                            const scale = maxWidth / img.width;
-                            imagePreview.width = maxWidth;
-                            imagePreview.height = img.height * scale;
-                        }
+                        // 移除寬高設置，讓CSS控制比例
+                        imagePreview.removeAttribute('width');
+                        imagePreview.removeAttribute('height');
                         
                         currentImage = img;
                         calculateBtn.disabled = false;
@@ -557,8 +564,8 @@
             
             // 保存坐標
             points.push({
-                x: (x / imagePreview.width) * originalWidth,
-                y: (y / imagePreview.height) * originalHeight
+                x: (x / rect.width) * originalWidth,
+                y: (y / rect.height) * originalHeight
             });
             
             // 如果有4個點，可以計算比例
@@ -719,13 +726,9 @@
                     originalWidth = imgElement.width;
                     originalHeight = imgElement.height;
                     
-                    // 調整預覽大小
-                    const maxWidth = 600;
-                    if (imgElement.width > maxWidth) {
-                        const scale = maxWidth / imgElement.width;
-                        imagePreview.width = maxWidth;
-                        imagePreview.height = imgElement.height * scale;
-                    }
+                    // 移除寬高設置，讓CSS控制比例
+                    imagePreview.removeAttribute('width');
+                    imagePreview.removeAttribute('height');
                     
                     currentImage = imgElement;
                     calculateBtn.disabled = false;
@@ -755,8 +758,8 @@
             createMarker(x, y, points.length);
             
             points.push({
-                x: (x / imagePreview.width) * originalWidth,
-                y: (y / imagePreview.height) * originalHeight
+                x: (x / rect.width) * originalWidth,
+                y: (y / rect.height) * originalHeight
             });
         }
     </script>
