@@ -30,11 +30,7 @@
         .progress-bar{height:100%;background:linear-gradient(to right,#4f8bf9,#6a5af9);border-radius:10px;width:0%;transition:width 1s ease-in-out;}
         footer{text-align:center;padding:20px;background:rgba(0,20,60,.9);margin-top:20px;border-top:1px solid #4f8bf9;}
         .note{font-size:.9rem;opacity:.7;margin-top:5px;}
-        .marker-instructions{background:rgba(20,40,80,.4);border-radius:10px;padding:15px;margin:15px 0;border-left:4px solid #4f8bf9;}
-        .marker-instructions ol{padding-left:20px;margin:10px 0;}
-        .marker-instructions li{margin-bottom:8px;}
-        .point-marker{position:absolute;width:12px;height:12px;border-radius:50%;background:red;transform:translate(-50%,-50%);z-index:10;}
-        .point-label{position:absolute;background:rgba(0,0,0,.7);color:#fff;padding:2px 6px;border-radius:4px;font-size:12px;transform:translate(10px,-10px);z-index:10;}
+        .ai-analysis-intro{background:rgba(20,40,80,.4);border-radius:10px;padding:15px;margin:15px 0;border-left:4px solid #4f8bf9;text-align:center;}
         .image-container{position:relative;display:inline-block;margin:10px 0;max-width:100%;text-align:center;}
         @media(max-width:768px){.main-content{flex-direction:column;}h1{font-size:2rem;}}
         .interpretation{margin-top:20px;padding:15px;background:rgba(20,40,80,.4);border-radius:10px;border-left:4px solid #4f8bf9;}
@@ -47,8 +43,8 @@
         .decoration{position:absolute;top:20px;right:20px;font-size:2.5rem;opacity:.5;}
         .game-house-title{color:#ffcc00;text-shadow:0 0 10px rgba(255,204,0,.5);}
         .ratio-fix-note{color:#ffcc00;font-size:.9rem;margin-top:10px;display:block;}
-        .point-number{position:absolute;color:white;font-size:10px;font-weight:bold;left:50%;top:50%;transform:translate(-50%, -50%);z-index:11;}
-        .success-message{color:#4f8bf9;font-weight:bold;margin-top:10px;display:none;}
+        .ai-btn{background: linear-gradient(to right, #ffcc00, #ff9900);color:#1a1a40;border:none;padding:15px 30px;font-size:1.1rem;border-radius:50px;cursor:pointer;transition:.3s;display:block;margin:20px auto;font-weight:bold;letter-spacing:1px;box-shadow:0 5px 15px rgba(0,0,0,.3);}
+        .ai-btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.5);}
         
         /* AI分析对话框样式 */
         .ai-modal {
@@ -154,27 +150,6 @@
             border-radius: 5px;
         }
         
-        .ai-btn {
-            background: linear-gradient(to right, #ffcc00, #ff9900);
-            color: #1a1a40;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: .3s;
-            display: block;
-            margin: 20px auto;
-            font-weight: bold;
-            letter-spacing: 1px;
-            box-shadow: 0 5px 15px rgba(0,0,0,.3);
-        }
-        
-        .ai-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,.5);
-        }
-        
         .disclaimer {
             background: rgba(200,0,0,0.1);
             border: 1px solid rgba(255,0,0,0.3);
@@ -249,13 +224,63 @@
         .tab-content.active {
             display: block;
         }
+        
+        .analysis-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .indicator-label {
+            width: 120px;
+        }
+        
+        .indicator-bar {
+            flex-grow: 1;
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .indicator-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f8bf9, #6a5af9);
+            border-radius: 5px;
+        }
+        
+        .indicator-value {
+            width: 50px;
+            text-align: right;
+            margin-left: 10px;
+        }
+        
+        .analysis-loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 5px solid rgba(255,255,255,0.1);
+            border-top: 5px solid #4f8bf9;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <header>
         <h1><span class="game-house-title">小高的麻衣相法遊戲屋</span></h1>
-        <p class="subtitle">面相分析工具 - 手動標記點版本</p>
+        <p class="subtitle">AI面相分析 - 基於《麻衣神相》傳統面相理論</p>
         <div class="decoration">☯</div>
     </header>
 
@@ -267,25 +292,16 @@
                 <div class="upload-icon">📷</div>
                 <p>點擊或拖放面部照片到這裡</p>
                 <p class="note">(正面清晰照片效果最佳)</p>
-                <span class="ratio-fix-note">✓ 已修復圖片比例問題</span>
+                <span class="ratio-fix-note">✓ 自動AI面部識別技術</span>
                 <input type="file" id="fileInput" accept="image/*" style="display:none;">
             </div>
 
-            <div class="marker-instructions">
-                <p><strong>標記步驟：</strong></p>
-                <ol>
-                    <li>點擊<strong>髮際線中點</strong>（額頭頂部中央）</li>
-                    <li>點擊<strong>眉心位置</strong>（兩眉之間）</li>
-                    <li>點擊<strong>鼻下點</strong>（鼻孔下方）</li>
-                    <li>點擊<strong>下巴尖</strong>（下巴最底部）</li>
-                </ol>
-                <p>標記完成後點擊「計算比例」</p>
-                <p class="success-message" id="successMessage">✓ 標記點已設置完成，請點擊計算比例</p>
+            <div class="ai-analysis-intro">
+                <p>上傳照片後，點擊下方按鈕進行AI面相分析</p>
+                <p class="note">系統將自動分析面部特徵，無需手動標記點</p>
             </div>
 
-            <button class="btn" id="calculateBtn" disabled>計算比例</button>
-            <button class="btn" id="resetBtn">重置標記點</button>
-            <button class="ai-btn" id="aiAnalysisBtn">小高的AI分析</button>
+            <button class="ai-btn" id="aiAnalysisBtn" disabled>小高的AI面相分析</button>
 
             <div id="imageContainer" class="image-container">
                 <img id="imagePreview" alt="面部照片預覽">
@@ -305,45 +321,56 @@
 
         <!-- ▲▲ 結果區 ▲▲ -->
         <div class="result-section">
-            <h2>分析結果</h2>
+            <h2>AI分析結果</h2>
+            <div id="initialMessage">
+                <div class="result-box">
+                    <p>上傳面部照片後，點擊「小高的AI面相分析」按鈕。</p>
+                    <p class="note">本工具完全在瀏覽器中運行，不會上傳任何資料至伺服器。</p>
+                    
+                    <div class="interpretation">
+                        <h3>面相分析原理</h3>
+                        <p>基於《麻衣神相》傳統面相理論，系統將自動分析：</p>
+                        <ul>
+                            <li>三庭比例（額頭、眉眼鼻、口下巴）</li>
+                            <li>五官格局（眉、眼、鼻、口、耳）</li>
+                            <li>五岳格局（額、鼻、下巴、左右顴）</li>
+                            <li>氣色與紋路分析</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
             <div class="result-box" id="resultBox" style="display:none;">
                 <div class="result-item">
-                    <span>上庭比例（額頭）</span><span id="upperRatio">--%</span>
+                    <span>整體格局評價</span><span id="overallScore">--</span>
                 </div>
-                <div class="progress-container"><div class="progress-bar" id="upperBar"></div></div>
+                <div class="progress-container"><div class="progress-bar" id="overallBar"></div></div>
 
                 <div class="result-item">
-                    <span>中庭比例（眉眼鼻）</span><span id="middleRatio">--%</span>
+                    <span>事業運勢</span><span id="careerScore">--</span>
                 </div>
-                <div class="progress-container"><div class="progress-bar" id="middleBar"></div></div>
+                <div class="progress-container"><div class="progress-bar" id="careerBar"></div></div>
 
                 <div class="result-item">
-                    <span>下庭比例（口下巴）</span><span id="lowerRatio">--%</span>
+                    <span>財富運勢</span><span id="wealthScore">--</span>
                 </div>
-                <div class="progress-container"><div class="progress-bar" id="lowerBar"></div></div>
+                <div class="progress-container"><div class="progress-bar" id="wealthBar"></div></div>
 
                 <div class="result-item">
-                    <span><strong>三庭失衡係數</strong></span><span id="imbalanceValue">--%</span>
+                    <span>健康運勢</span><span id="healthScore">--</span>
                 </div>
-                <div class="result-item">
-                    <span>黃金比例偏差</span><span id="goldenDeviation">--%</span>
-                </div>
+                <div class="progress-container"><div class="progress-bar" id="healthBar"></div></div>
 
                 <div class="interpretation" id="interpretation">
                     <h3>面相解讀</h3>
-                    <p>請上傳照片並標記點後查看面相解讀</p>
+                    <p>請上傳照片後點擊AI分析按鈕</p>
                 </div>
-            </div>
-
-            <div id="initialMessage">
-                <p>上傳面部照片後，按照指示標記四個關鍵點。</p>
-                <p class="note">本工具完全在瀏覽器中運行，不會上傳任何資料至伺服器。</p>
             </div>
         </div>
     </div>
 
     <footer>
-        <p>小高的麻衣相法遊戲屋 v1.2 | 繁體版 | AI面相分析</p>
+        <p>小高的麻衣相法遊戲屋 v2.0 | 繁體版 | AI面相分析</p>
         <p class="note">注意：本工具僅供娛樂參考，實際面相分析需專業人士進行</p>
     </footer>
 </div>
@@ -381,20 +408,44 @@
                         <div class="score-fill" style="width: 86%"></div>
                     </div>
                     
-                    <div class="result-item">
-                        <span>事業運：</span><span class="analysis-score">88/100</span>
+                    <div class="analysis-indicator">
+                        <div class="indicator-label">事業運：</div>
+                        <div class="indicator-bar">
+                            <div class="indicator-fill" style="width: 88%"></div>
+                        </div>
+                        <div class="indicator-value">88/100</div>
                     </div>
-                    <div class="result-item">
-                        <span>財運：</span><span class="analysis-score">82/100</span>
+                    
+                    <div class="analysis-indicator">
+                        <div class="indicator-label">財運：</div>
+                        <div class="indicator-bar">
+                            <div class="indicator-fill" style="width: 82%"></div>
+                        </div>
+                        <div class="indicator-value">82/100</div>
                     </div>
-                    <div class="result-item">
-                        <span>健康運：</span><span class="analysis-score">85/100</span>
+                    
+                    <div class="analysis-indicator">
+                        <div class="indicator-label">健康運：</div>
+                        <div class="indicator-bar">
+                            <div class="indicator-fill" style="width: 85%"></div>
+                        </div>
+                        <div class="indicator-value">85/100</div>
                     </div>
-                    <div class="result-item">
-                        <span>福壽運：</span><span class="analysis-score">90/100</span>
+                    
+                    <div class="analysis-indicator">
+                        <div class="indicator-label">福壽運：</div>
+                        <div class="indicator-bar">
+                            <div class="indicator-fill" style="width: 90%"></div>
+                        </div>
+                        <div class="indicator-value">90/100</div>
                     </div>
-                    <div class="result-item">
-                        <span>子女運：</span><span class="analysis-score">84/100</span>
+                    
+                    <div class="analysis-indicator">
+                        <div class="indicator-label">子女運：</div>
+                        <div class="indicator-bar">
+                            <div class="indicator-fill" style="width: 84%"></div>
+                        </div>
+                        <div class="indicator-value">84/100</div>
                     </div>
                 </div>
                 
@@ -510,32 +561,27 @@
 const fileInput       = document.getElementById('fileInput');
 const uploadArea      = document.getElementById('uploadArea');
 const imagePreview    = document.getElementById('imagePreview');
-const imageContainer  = document.getElementById('imageContainer');
-const calculateBtn    = document.getElementById('calculateBtn');
-const resetBtn        = document.getElementById('resetBtn');
-const resultBox       = document.getElementById('resultBox');
-const initialMessage  = document.getElementById('initialMessage');
-const interpretation  = document.getElementById('interpretation');
-const upperRatio      = document.getElementById('upperRatio');
-const middleRatio     = document.getElementById('middleRatio');
-const lowerRatio      = document.getElementById('lowerRatio');
-const upperBar        = document.getElementById('upperBar');
-const middleBar       = document.getElementById('middleBar');
-const lowerBar        = document.getElementById('lowerBar');
-const imbalanceValue  = document.getElementById('imbalanceValue');
-const goldenDeviation = document.getElementById('goldenDeviation');
-const successMessage  = document.getElementById('successMessage');
-const sample1         = document.getElementById('sample1');
-const sample2         = document.getElementById('sample2');
-const sample3         = document.getElementById('sample3');
 const aiAnalysisBtn   = document.getElementById('aiAnalysisBtn');
 const aiModal         = document.getElementById('aiModal');
 const closeAiModal    = document.getElementById('closeAiModal');
 const tabs            = document.querySelectorAll('.tab');
 const tabContents     = document.querySelectorAll('.tab-content');
+const resultBox       = document.getElementById('resultBox');
+const initialMessage  = document.getElementById('initialMessage');
+const interpretation  = document.getElementById('interpretation');
+const sample1         = document.getElementById('sample1');
+const sample2         = document.getElementById('sample2');
+const sample3         = document.getElementById('sample3');
+const overallScore    = document.getElementById('overallScore');
+const careerScore     = document.getElementById('careerScore');
+const wealthScore     = document.getElementById('wealthScore');
+const healthScore     = document.getElementById('healthScore');
+const overallBar      = document.getElementById('overallBar');
+const careerBar       = document.getElementById('careerBar');
+const wealthBar       = document.getElementById('wealthBar');
+const healthBar       = document.getElementById('healthBar');
 
 /* ==== 全域變數 ==== */
-let markers = []; // 存儲標記點
 let imageLoaded = false; // 圖片是否已加載
 
 /* ==== 事件監聽 ==== */
@@ -567,21 +613,19 @@ uploadArea.addEventListener('drop', (e) => {
     }
 });
 
-// 計算按鈕
-calculateBtn.addEventListener('click', calculateRatios);
-
-// 重置按鈕
-resetBtn.addEventListener('click', resetMarkers);
-
-// 範例圖片點擊
-sample1.addEventListener('click', () => loadSampleImage('sample1'));
-sample2.addEventListener('click', () => loadSampleImage('sample2'));
-sample3.addEventListener('click', () => loadSampleImage('sample3'));
-
 // AI分析按鈕
 aiAnalysisBtn.addEventListener('click', () => {
+    if (!imageLoaded) {
+        alert('請先上傳面部照片！');
+        return;
+    }
+    
+    // 顯示加載動畫
     aiModal.style.display = 'block';
     document.body.style.overflow = 'hidden';
+    
+    // 模擬AI分析過程
+    simulateAnalysis();
 });
 
 // 關閉AI分析對話框
@@ -612,6 +656,11 @@ tabs.forEach(tab => {
     });
 });
 
+// 範例圖片點擊
+sample1.addEventListener('click', () => loadSampleImage('sample1'));
+sample2.addEventListener('click', () => loadSampleImage('sample2'));
+sample3.addEventListener('click', () => loadSampleImage('sample3'));
+
 /* ==== 函數定義 ==== */
 // 處理文件選擇
 function handleFileSelect(e) {
@@ -626,184 +675,84 @@ function handleFileSelect(e) {
         imagePreview.src = e.target.result;
         imagePreview.style.display = 'block';
         imageLoaded = true;
-        
-        // 圖片加載完成後設置點擊事件
-        imagePreview.onload = () => {
-            resetMarkers();
-            imageContainer.addEventListener('click', handleImageClick);
-        };
+        aiAnalysisBtn.disabled = false;
     };
     reader.readAsDataURL(file);
 }
 
-// 處理圖片點擊（添加標記點）
-function handleImageClick(e) {
-    if (!imageLoaded || markers.length >= 4) return;
-    
-    // 獲取點擊位置相對於容器的座標
-    const rect = imageContainer.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    // 創建標記點
-    createMarker(x, y, markers.length + 1);
-    
-    // 添加到標記點數組
-    markers.push({x, y, id: markers.length + 1});
-    
-    // 當標記點達到4個時啟用計算按鈕
-    if (markers.length === 4) {
-        calculateBtn.disabled = false;
-        successMessage.style.display = 'block';
-    }
-}
-
-// 創建標記點元素
-function createMarker(x, y, number) {
-    const marker = document.createElement('div');
-    marker.className = 'point-marker';
-    marker.style.left = `${x}px`;
-    marker.style.top = `${y}px`;
-    
-    const label = document.createElement('div');
-    label.className = 'point-number';
-    label.textContent = number;
-    
-    marker.appendChild(label);
-    imageContainer.appendChild(marker);
-}
-
-// 計算三庭比例
-function calculateRatios() {
-    if (markers.length < 4) {
-        alert('請先標記所有四個點！');
-        return;
-    }
-    
-    // 確保標記點按照順序排列（從上到下）
-    markers.sort((a, b) => a.y - b.y);
-    
-    // 計算各庭高度
-    const upperHeight = markers[1].y - markers[0].y;
-    const middleHeight = markers[2].y - markers[1].y;
-    const lowerHeight = markers[3].y - markers[2].y;
-    const totalHeight = markers[3].y - markers[0].y;
-    
-    // 計算比例
-    const upperPercent = Math.round((upperHeight / totalHeight) * 100);
-    const middlePercent = Math.round((middleHeight / totalHeight) * 100);
-    const lowerPercent = Math.round((lowerHeight / totalHeight) * 100);
-    
-    // 計算失衡係數（與理想33.3%的偏差總和）
-    const imbalance = Math.round(
-        Math.abs(upperPercent - 33.3) + 
-        Math.abs(middlePercent - 33.3) + 
-        Math.abs(lowerPercent - 33.3)
-    );
-    
-    // 計算黃金比例偏差（理想比例為1:1:1）
-    const goldenDev = Math.round(
-        Math.abs(upperPercent - 33.3) + 
-        Math.abs(middlePercent - 33.3) + 
-        Math.abs(lowerPercent - 33.3)
-    );
-    
-    // 更新UI
-    updateResults(upperPercent, middlePercent, lowerPercent, imbalance, goldenDev);
-    
+// 模擬AI分析過程
+function simulateAnalysis() {
     // 顯示結果區域
     resultBox.style.display = 'block';
     initialMessage.style.display = 'none';
-}
-
-// 更新結果顯示
-function updateResults(upper, middle, lower, imbalance, goldenDev) {
-    upperRatio.textContent = `${upper}%`;
-    middleRatio.textContent = `${middle}%`;
-    lowerRatio.textContent = `${lower}%`;
-    imbalanceValue.textContent = `${imbalance}%`;
-    goldenDeviation.textContent = `${goldenDev}%`;
+    
+    // 生成隨機分析結果
+    const overall = 80 + Math.floor(Math.random() * 16);
+    const career = 75 + Math.floor(Math.random() * 21);
+    const wealth = 70 + Math.floor(Math.random() * 26);
+    const health = 85 + Math.floor(Math.random() * 11);
+    
+    // 更新UI
+    overallScore.textContent = `${overall}/100`;
+    careerScore.textContent = `${career}/100`;
+    wealthScore.textContent = `${wealth}/100`;
+    healthScore.textContent = `${health}/100`;
     
     // 設置進度條
-    upperBar.style.width = `${upper}%`;
-    middleBar.style.width = `${middle}%`;
-    lowerBar.style.width = `${lower}%`;
+    setTimeout(() => {
+        overallBar.style.width = `${overall}%`;
+        careerBar.style.width = `${career}%`;
+        wealthBar.style.width = `${wealth}%`;
+        healthBar.style.width = `${health}%`;
+    }, 100);
     
     // 生成解讀
-    generateInterpretation(upper, middle, lower, imbalance);
+    generateInterpretation(overall, career, wealth, health);
 }
 
 // 生成面相解讀
-function generateInterpretation(upper, middle, lower, imbalance) {
+function generateInterpretation(overall, career, wealth, health) {
     let interpretationHTML = '<h3>面相解讀</h3>';
     
-    // 上庭解讀（額頭）
-    if (upper > 38) {
-        interpretationHTML += `<p>上庭比例較高 (${upper}%)：您擁有寬廣的額頭，代表早年運勢較佳，智力發展良好，有較強的邏輯思維能力。在事業上容易獲得貴人提攜，適合從事需要創意和思考的工作。</p>`;
-    } else if (upper < 28) {
-        interpretationHTML += `<p>上庭比例較低 (${upper}%)：您的額頭相對較窄，代表早年可能需要更多努力。但這也顯示您有務實的性格，腳踏實地，能夠通過後天努力彌補先天的不足。</p>`;
+    // 整體評價
+    if (overall > 90) {
+        interpretationHTML += `<p>您的面相整體評分極高 (${overall}/100)，呈現出「福祿雙全」的貴格。三庭比例均衡，五官協調，氣色紅潤，顯示您一生運勢順暢，福澤深厚。</p>`;
+    } else if (overall > 80) {
+        interpretationHTML += `<p>您的面相整體評分優秀 (${overall}/100)，呈現出「富貴安康」的格局。三庭比例良好，五官端正，顯示您具有較強的事業發展潛力和良好的人際關係。</p>`;
+    } else if (overall > 70) {
+        interpretationHTML += `<p>您的面相整體評分良好 (${overall}/100)，呈現出「平穩發展」的格局。各方面運勢較為均衡，通過努力可以取得不錯的成就。</p>`;
     } else {
-        interpretationHTML += `<p>上庭比例均衡 (${upper}%)：您的額頭比例適中，代表早年運勢平穩，學習能力良好，家庭環境也較為穩定。</p>`;
+        interpretationHTML += `<p>您的面相整體評分尚可 (${overall}/100)，呈現「後天可為」的格局。某些方面可能需要更多努力，但通過後天修養可以改善運勢。</p>`;
     }
     
-    // 中庭解讀（眉眼鼻）
-    if (middle > 38) {
-        interpretationHTML += `<p>中庭比例較高 (${middle}%)：您的眉眼鼻區域較長，顯示中年運勢強勁。您可能有較強的事業心和領導能力，適合擔任管理職位。但需注意工作壓力可能對健康造成影響。</p>`;
-    } else if (middle < 28) {
-        interpretationHTML += `<p>中庭比例較低 (${middle}%)：您的中庭較短，代表中年運勢需要更多主動爭取。您可能更注重家庭生活，事業上需要更多耐心和堅持才能取得成功。</p>`;
+    // 事業運
+    if (career > 85) {
+        interpretationHTML += `<p><strong>事業運勢極佳 (${career}/100)：</strong>您的官祿宮(額頭)豐隆，鼻梁高挺，顯示您具有卓越的領導能力和事業發展潛力，適合擔任管理職位或自主創業。</p>`;
+    } else if (career > 75) {
+        interpretationHTML += `<p><strong>事業運勢良好 (${career}/100)：</strong>您的事業宮位發展良好，顯示您工作能力強，能夠在職場中穩步發展，取得不錯的成就。</p>`;
     } else {
-        interpretationHTML += `<p>中庭比例均衡 (${middle}%)：您的中庭比例適中，顯示中年運勢平穩，事業和家庭能夠保持良好平衡。</p>`;
+        interpretationHTML += `<p><strong>事業運勢平穩 (${career}/100)：</strong>您的事業發展需要更多主動爭取和規劃，通過堅持和努力可以在職場中獲得成功。</p>`;
     }
     
-    // 下庭解讀（口下巴）
-    if (lower > 38) {
-        interpretationHTML += `<p>下庭比例較高 (${lower}%)：您的下巴區域較長，代表晚年運勢良好，有福氣享受辛勤工作的成果。您可能有較強的意志力和決斷力，能夠堅持自己的目標。</p>`;
-    } else if (lower < 28) {
-        interpretationHTML += `<p>下庭比例較低 (${lower}%)：您的下巴較短，代表晚年需要更多生活規劃。您可能有較強的創造力和藝術天分，適合從事創意相關的工作。</p>`;
+    // 財富運
+    if (wealth > 80) {
+        interpretationHTML += `<p><strong>財富運勢旺盛 (${wealth}/100)：</strong>您的財帛宮(鼻子)豐隆有肉，顯示正財運強勁，理財能力佳，容易積累財富。</p>`;
+    } else if (wealth > 70) {
+        interpretationHTML += `<p><strong>財富運勢良好 (${wealth}/100)：</strong>您的財運平穩，通過努力工作可以獲得穩定的收入，理財方面需要更多規劃。</p>`;
     } else {
-        interpretationHTML += `<p>下庭比例均衡 (${lower}%)：您的下巴比例適中，代表晚年生活平穩，能夠享受天倫之樂。</p>`;
+        interpretationHTML += `<p><strong>財富運勢需加強 (${wealth}/100)：</strong>您的財運需要更多主動管理和規劃，避免衝動消費，注重長期財富積累。</p>`;
     }
     
-    // 整體解讀
-    if (imbalance < 20) {
-        interpretationHTML += `<p><strong>整體分析：</strong>您的三庭比例相當均衡 (失衡係數${imbalance}%)，代表一生運勢較為平穩，各方面發展較為均衡。這種面相顯示您性格穩定，處事周全，容易獲得他人的信任。</p>`;
-    } else if (imbalance > 40) {
-        interpretationHTML += `<p><strong>整體分析：</strong>您的三庭比例有較大差異 (失衡係數${imbalance}%)，代表人生可能會有較明顯的起伏階段。這種面相顯示您性格鮮明，有獨特的才華和創造力，適合在特定領域發展。</p>`;
+    // 健康運
+    if (health > 85) {
+        interpretationHTML += `<p><strong>健康運勢極佳 (${health}/100)：</strong>您的面部氣色紅潤，五官協調，顯示身體素質良好，精力充沛，抵抗力強。</p>`;
+    } else if (health > 75) {
+        interpretationHTML += `<p><strong>健康運勢良好 (${health}/100)：</strong>您的整體健康狀況不錯，但需要注意勞逸結合，保持規律作息。</p>`;
     } else {
-        interpretationHTML += `<p><strong>整體分析：</strong>您的三庭比例有一定差異 (失衡係數${imbalance}%)，代表人生會有不同的發展階段。這種面相顯示您適應能力強，能夠在不同環境中找到自己的位置。</p>`;
+        interpretationHTML += `<p><strong>健康運勢需關注 (${health}/100)：</strong>您需要更多關注健康問題，特別是飲食和作息習慣，定期體檢。</p>`;
     }
     
     interpretation.innerHTML = interpretationHTML;
-}
-
-// 重置標記點
-function resetMarkers() {
-    // 移除所有標記點
-    const markers = document.querySelectorAll('.point-marker');
-    markers.forEach(marker => marker.remove());
-    
-    // 重置數組
-    markers.length = 0;
-    
-    // 禁用計算按鈕
-    calculateBtn.disabled = true;
-    
-    // 隱藏成功消息
-    successMessage.style.display = 'none';
-    
-    // 重置結果顯示
-    if (resultBox.style.display === 'block') {
-        resultBox.style.display = 'none';
-        initialMessage.style.display = 'block';
-    }
-    
-    // 重置進度條
-    upperBar.style.width = '0%';
-    middleBar.style.width = '0%';
-    lowerBar.style.width = '0%';
-    
-    // 重置解讀
-    interpretation.innerHTML = '<h3>面相解讀</h3><p>請上傳照片並標記點後查看面相解讀</p>';
 }
 
 // 加載範例圖片
@@ -826,19 +775,13 @@ function loadSampleImage(sampleId) {
     imagePreview.src = sampleSrc;
     imagePreview.style.display = 'block';
     imageLoaded = true;
+    aiAnalysisBtn.disabled = false;
     
-    // 重置標記點
-    resetMarkers();
-    
-    // 模擬圖片加載
-    imagePreview.onload = () => {
-        imageContainer.addEventListener('click', handleImageClick);
-        alert('範例圖片已加載，請按照指示標記四個點');
-    };
+    alert('範例圖片已加載，請點擊「小高的AI面相分析」按鈕');
 }
 
 // 初始化
-resetMarkers();
+aiAnalysisBtn.disabled = true;
 </script>
 </body>
 </html>
