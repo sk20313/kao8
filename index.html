@@ -274,6 +274,88 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* 娛樂面相結果樣式 */
+        .entertainment-result {
+            background: rgba(30, 15, 60, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #9c4dff;
+            display: none;
+        }
+        
+        .entertainment-header {
+            color: #ffcc00;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+        }
+        
+        .entertainment-feature {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(100, 50, 150, 0.3);
+            border-radius: 10px;
+            border-left: 3px solid #9c4dff;
+        }
+        
+        .entertainment-tags {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .entertainment-tag {
+            background: linear-gradient(to right, #9c4dff, #6a5af9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .entertainment-quote {
+            font-style: italic;
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 3px solid #ffcc00;
+        }
+        
+        .entertainment-disclaimer {
+            background: rgba(200,0,0,0.1);
+            border: 1px solid rgba(255,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .entertainment-btn {
+            background: linear-gradient(to right, #9c4dff, #6a5af9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: block;
+            margin: 20px auto;
+            font-weight: bold;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .entertainment-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
@@ -302,6 +384,9 @@
             </div>
 
             <button class="ai-btn" id="aiAnalysisBtn" disabled>小高的AI面相分析</button>
+            
+            <!-- 新增娛樂面相按鈕 -->
+            <button class="entertainment-btn" id="entertainmentBtn">生成娛樂面相劇本</button>
 
             <div id="imageContainer" class="image-container">
                 <img id="imagePreview" alt="面部照片預覽">
@@ -366,11 +451,36 @@
                     <p>請上傳照片後點擊AI分析按鈕</p>
                 </div>
             </div>
+            
+            <!-- 新增娛樂面相結果區域 -->
+            <div class="entertainment-result" id="entertainmentResult">
+                <div class="entertainment-header">🎭 AI面相劇本生成</div>
+                
+                <div class="entertainment-feature">
+                    <h3>🌜 您的面相特徵</h3>
+                    <p id="entertainmentFeatures">特徵生成中...</p>
+                </div>
+                
+                <div class="entertainment-quote" id="entertainmentQuote">
+                    "古籍引文生成中..."
+                </div>
+                
+                <div class="entertainment-tags" id="entertainmentTags">
+                    <!-- 標籤將由JS動態生成 -->
+                </div>
+                
+                <div class="entertainment-disclaimer">
+                    ⚠️ 免責聲明：本分析為AI娛樂生成，無科學依據。相由心生，福自我求。
+                </div>
+                
+                <button class="entertainment-btn" onclick="generateEntertainmentReading()">重新生成劇本</button>
+                <button class="entertainment-btn" onclick="shareResult()">分享我的面相劇本</button>
+            </div>
         </div>
     </div>
 
     <footer>
-        <p>小高的麻衣相法遊戲屋 v2.0 | 繁體版 | AI面相分析</p>
+        <p>小高的麻衣相法遊戲屋 v3.0 | 繁體版 | AI面相分析</p>
         <p class="note">注意：本工具僅供娛樂參考，實際面相分析需專業人士進行</p>
     </footer>
 </div>
@@ -580,6 +690,11 @@ const overallBar      = document.getElementById('overallBar');
 const careerBar       = document.getElementById('careerBar');
 const wealthBar       = document.getElementById('wealthBar');
 const healthBar       = document.getElementById('healthBar');
+const entertainmentBtn = document.getElementById('entertainmentBtn');
+const entertainmentResult = document.getElementById('entertainmentResult');
+const entertainmentFeatures = document.getElementById('entertainmentFeatures');
+const entertainmentQuote = document.getElementById('entertainmentQuote');
+const entertainmentTags = document.getElementById('entertainmentTags');
 
 /* ==== 全域變數 ==== */
 let imageLoaded = false; // 圖片是否已加載
@@ -626,6 +741,27 @@ aiAnalysisBtn.addEventListener('click', () => {
     
     // 模擬AI分析過程
     simulateAnalysis();
+});
+
+// 娛樂面相按鈕
+entertainmentBtn.addEventListener('click', () => {
+    if (!imageLoaded) {
+        alert('請先上傳面部照片！');
+        return;
+    }
+    
+    // 顯示娛樂結果區域
+    entertainmentResult.style.display = 'block';
+    resultBox.style.display = 'none';
+    initialMessage.style.display = 'none';
+    
+    // 顯示加載訊息
+    entertainmentFeatures.innerHTML = "<div style='text-align:center;padding:20px;'>🔮 AI正在生成您的面相劇本...</div>";
+    entertainmentQuote.textContent = "生成中...";
+    entertainmentTags.innerHTML = "";
+    
+    // 延遲生成效果
+    setTimeout(generateEntertainmentReading, 800);
 });
 
 // 關閉AI分析對話框
@@ -676,6 +812,7 @@ function handleFileSelect(e) {
         imagePreview.style.display = 'block';
         imageLoaded = true;
         aiAnalysisBtn.disabled = false;
+        entertainmentBtn.disabled = false;
     };
     reader.readAsDataURL(file);
 }
@@ -685,6 +822,7 @@ function simulateAnalysis() {
     // 顯示結果區域
     resultBox.style.display = 'block';
     initialMessage.style.display = 'none';
+    entertainmentResult.style.display = 'none';
     
     // 生成隨機分析結果
     const overall = 80 + Math.floor(Math.random() * 16);
@@ -776,12 +914,108 @@ function loadSampleImage(sampleId) {
     imagePreview.style.display = 'block';
     imageLoaded = true;
     aiAnalysisBtn.disabled = false;
+    entertainmentBtn.disabled = false;
     
     alert('範例圖片已加載，請點擊「小高的AI面相分析」按鈕');
 }
 
+// 生成娛樂面相報告
+function generateEntertainmentReading() {
+    // 面相特徵池
+    const features = {
+        forehead: ["天庭飽滿如覆玉，智慧超群顯貴氣", "上庭高廣有貴氣，少年得志展宏圖", "額角崢嶸顯智慧，才思敏捷冠群倫"],
+        eyes: ["鳳目含威藏魄力，決斷果敢顯英明", "龍睛炯炯透機敏，洞察先機識人心", "桃花眼帶三分笑，人緣廣結福運來"],
+        nose: ["鼻如懸膽財庫豐，富貴榮華自天來", "山根貫頂氣勢雄，權柄在握顯威嚴", "鼻翼飽滿聚財帛，理財有方積萬金"],
+        mouth: ["唇若塗朱善言辭，口才便給服眾人", "口如四字掌威權，號令四方顯尊榮", "仰月唇形貴人扶，福祿雙全享安康"],
+        special: ["法令深長號令明，統御有方成大事", "耳垂厚大福壽增，晚運亨通子孫賢", "眉間川字思慮深，謀定後動成偉業"]
+    };
+    
+    // 古籍引文池
+    const quotes = [
+        "《麻衣相法》：'眼如日月要分明，鳳目龍睛切要清'",
+        "《柳莊相法》：'鼻如懸膽身須貴，土曜當生得地來'",
+        "《神相全編》：'天庭飽滿宜早貴，地閣方圓晚運亨'",
+        "《玉管照神局》：'眉清目秀精神足，富貴榮華自天來'",
+        "《太清神鑒》：'口如四字主官貴，唇若塗朱福壽增'"
+    ];
+    
+    // 人生標籤池
+    const tags = ["魄力非凡", "貴人相扶", "晚運亨通", "才思敏捷", 
+                "情路順遂", "財源廣進", "健康長壽", "權柄在握",
+                "智慧超群", "福澤綿長", "人脈金礦", "事業騰達"];
+    
+    // 隨機選擇函數
+    const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    
+    // 隨機選擇3個不重複的標籤
+    const getRandomTags = () => {
+        let result = [];
+        while (result.length < 3) {
+            const tag = tags[Math.floor(Math.random() * tags.length)];
+            if (!result.includes(tag)) result.push(tag);
+        }
+        return result;
+    };
+    
+    // 構建特徵文本
+    const foreheadFeature = getRandom(features.forehead);
+    const eyesFeature = getRandom(features.eyes);
+    const noseFeature = getRandom(features.nose);
+    const mouthFeature = getRandom(features.mouth);
+    const specialFeature = getRandom(features.special);
+    
+    // 構建特徵HTML
+    entertainmentFeatures.innerHTML = `
+        <p>額相：${foreheadFeature}</p>
+        <p>眼相：${eyesFeature}</p>
+        <p>鼻相：${noseFeature}</p>
+        <p>唇相：${mouthFeature}</p>
+        <p>特徵：${specialFeature}</p>
+    `;
+    
+    // 構建古籍引文
+    entertainmentQuote.textContent = getRandom(quotes);
+    
+    // 構建標籤
+    const selectedTags = getRandomTags();
+    entertainmentTags.innerHTML = '';
+    selectedTags.forEach(tag => {
+        const tagElement = document.createElement('div');
+        tagElement.className = 'entertainment-tag';
+        tagElement.textContent = `【${tag}】`;
+        entertainmentTags.appendChild(tagElement);
+    });
+}
+
+// 分享結果
+function shareResult() {
+    const features = entertainmentFeatures.textContent;
+    const quote = entertainmentQuote.textContent;
+    const tags = Array.from(entertainmentTags.children).map(el => el.textContent).join(' ');
+    
+    const text = `我的AI面相劇本：
+🎭 AI面相劇本生成
+🌜 面相特徵：
+${features}
+📜 古籍佐證：
+"${quote}"
+✨ 人生劇本：
+${tags}
+
+⚠️ 免責聲明：本分析為AI娛樂生成，無科學依據。相由心生，福自我求。
+`;
+    
+    try {
+        navigator.clipboard.writeText(text);
+        alert('面相劇本已複製！快去貼上分享給朋友吧~');
+    } catch (err) {
+        alert('無法複製文本，請手動複製內容');
+    }
+}
+
 // 初始化
 aiAnalysisBtn.disabled = true;
+entertainmentBtn.disabled = true;
 </script>
 </body>
 </html>
