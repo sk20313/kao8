@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小高的麻衣相法遊戲屋 - 面相分析工具</title>
+    <title>小高的麻衣相法遊戲屋 - AI面相分析</title>
     <style>
         /* ---------- 版面與配色 ---------- */
         *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI','Microsoft JhengHei',sans-serif;}
@@ -49,6 +49,206 @@
         .ratio-fix-note{color:#ffcc00;font-size:.9rem;margin-top:10px;display:block;}
         .point-number{position:absolute;color:white;font-size:10px;font-weight:bold;left:50%;top:50%;transform:translate(-50%, -50%);z-index:11;}
         .success-message{color:#4f8bf9;font-weight:bold;margin-top:10px;display:none;}
+        
+        /* AI分析对话框样式 */
+        .ai-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            overflow: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .ai-content {
+            background: linear-gradient(135deg, #1a1a40, #0d0d26);
+            max-width: 900px;
+            margin: 40px auto;
+            border-radius: 20px;
+            border: 2px solid #4f8bf9;
+            overflow: hidden;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.7);
+        }
+        
+        .ai-header {
+            background: rgba(0,30,70,0.9);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #4f8bf9;
+        }
+        
+        .ai-header h2 {
+            color: #ffcc00;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .close-btn:hover {
+            color: #ff4d4d;
+            transform: scale(1.2);
+        }
+        
+        .ai-body {
+            padding: 25px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .ai-section {
+            margin-bottom: 30px;
+            background: rgba(10,20,50,0.5);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #4f8bf9;
+        }
+        
+        .ai-section h3 {
+            color: #4f8bf9;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .ai-section p {
+            line-height: 1.7;
+            margin-bottom: 10px;
+        }
+        
+        .analysis-score {
+            display: inline-block;
+            background: #4f8bf9;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .score-bar {
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f8bf9, #6a5af9);
+            border-radius: 5px;
+        }
+        
+        .ai-btn {
+            background: linear-gradient(to right, #ffcc00, #ff9900);
+            color: #1a1a40;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: .3s;
+            display: block;
+            margin: 20px auto;
+            font-weight: bold;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,0,0,.3);
+        }
+        
+        .ai-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,.5);
+        }
+        
+        .disclaimer {
+            background: rgba(200,0,0,0.1);
+            border: 1px solid rgba(255,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .analysis-title {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .analysis-title h2 {
+            color: #ffcc00;
+            font-size: 2rem;
+            display: inline-block;
+            padding: 0 20px;
+            background: rgba(0,30,70,0.9);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .analysis-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #4f8bf9, transparent);
+            z-index: 1;
+        }
+        
+        .ai-footer {
+            padding: 15px;
+            text-align: center;
+            background: rgba(0,20,40,0.7);
+            border-top: 1px solid #4f8bf9;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            background: rgba(0,20,40,0.5);
+            border-radius: 50px;
+            padding: 5px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: 0.3s;
+        }
+        
+        .tab.active {
+            background: linear-gradient(to right, #4f8bf9, #6a5af9);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -85,6 +285,7 @@
 
             <button class="btn" id="calculateBtn" disabled>計算比例</button>
             <button class="btn" id="resetBtn">重置標記點</button>
+            <button class="ai-btn" id="aiAnalysisBtn">小高的AI分析</button>
 
             <div id="imageContainer" class="image-container">
                 <img id="imagePreview" alt="面部照片預覽">
@@ -142,9 +343,165 @@
     </div>
 
     <footer>
-        <p>小高的麻衣相法遊戲屋 v1.1 | 繁體版</p>
+        <p>小高的麻衣相法遊戲屋 v1.2 | 繁體版 | AI面相分析</p>
         <p class="note">注意：本工具僅供娛樂參考，實際面相分析需專業人士進行</p>
     </footer>
+</div>
+
+<!-- AI分析对话框 -->
+<div id="aiModal" class="ai-modal">
+    <div class="ai-content">
+        <div class="ai-header">
+            <h2>小高的AI面相分析</h2>
+            <button class="close-btn" id="closeAiModal">&times;</button>
+        </div>
+        <div class="ai-body">
+            <div class="analysis-title">
+                <h2>基於《麻衣神相》的專業面相分析</h2>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tab active" data-tab="summary">整體分析</div>
+                <div class="tab" data-tab="details">詳細報告</div>
+                <div class="tab" data-tab="advice">運勢建議</div>
+            </div>
+            
+            <div class="tab-content active" id="summary-tab">
+                <div class="ai-section">
+                    <h3>整體格局評價</h3>
+                    <p>根據《麻衣神相》理論分析，您的面相整體呈現「福壽雙全」的格局。</p>
+                    <p>三庭比例均衡，五岳格局協調，五官搭配得宜，氣色紅潤有光澤。</p>
+                    <p>整體格局印象：<strong>福厚貴氣</strong>，具有較強的領導力和人際關係能力。</p>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>綜合評分</h3>
+                    <p>整體面相評分：<span class="analysis-score">86/100</span></p>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 86%"></div>
+                    </div>
+                    
+                    <div class="result-item">
+                        <span>事業運：</span><span class="analysis-score">88/100</span>
+                    </div>
+                    <div class="result-item">
+                        <span>財運：</span><span class="analysis-score">82/100</span>
+                    </div>
+                    <div class="result-item">
+                        <span>健康運：</span><span class="analysis-score">85/100</span>
+                    </div>
+                    <div class="result-item">
+                        <span>福壽運：</span><span class="analysis-score">90/100</span>
+                    </div>
+                    <div class="result-item">
+                        <span>子女運：</span><span class="analysis-score">84/100</span>
+                    </div>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>近期運勢分析</h3>
+                    <p>當前面部氣色紅潤有光澤，額頭明亮，顯示近期事業運勢處於上升期。</p>
+                    <p>鼻頭微顯黃潤，財帛宮豐隆，預示未來三個月有財運機會。</p>
+                    <p>眼下微有青氣，建議注意休息，避免過度勞累。</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="details-tab">
+                <div class="ai-section">
+                    <h3>三庭比例分析</h3>
+                    <p><strong>上庭 (額頭) 評分：<span class="analysis-score">85/100</span></strong></p>
+                    <p>額頭高闊飽滿，髮際線整齊，無明顯疤痕或紋路。此為智慧與早年運勢佳之相。</p>
+                    
+                    <p><strong>中庭 (眉眼鼻) 評分：<span class="analysis-score">88/100</span></strong></p>
+                    <p>眉清目秀，鼻梁高挺，顴骨豐滿有肉但不突出。此相主中年運勢強盛，事業發展順利。</p>
+                    
+                    <p><strong>下庭 (口下巴) 評分：<span class="analysis-score">84/100</span></strong></p>
+                    <p>下巴方圓有肉，人中深長清晰，口型端正。預示晚年福祿雙全，子孫緣佳。</p>
+                    
+                    <p><strong>三庭均衡度：<span class="analysis-score">90/100</span></strong></p>
+                    <p>三庭比例協調，長度接近1:1:1，符合相學中的貴格標準。</p>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>五岳格局分析</h3>
+                    <p><strong>南岳 (額頭)：<span class="analysis-score">86/100</span></strong></p>
+                    <p>寬闊飽滿，氣色紅潤，主智慧與貴人運。</p>
+                    
+                    <p><strong>中岳 (鼻子)：<span class="analysis-score">90/100</span></strong></p>
+                    <p>鼻梁挺拔如嵩山，鼻頭圓潤有肉，鼻翼豐厚，為財運亨通之相。</p>
+                    
+                    <p><strong>北岳 (下巴)：<span class="analysis-score">85/100</span></strong></p>
+                    <p>方圓有勢，主晚年福壽與意志力。</p>
+                    
+                    <p><strong>東西岳 (左右顴骨)：<span class="analysis-score">84/100</span></strong></p>
+                    <p>左右顴骨高度適中，豐滿有肉，與鼻相配得宜，主權力與管理能力。</p>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>五官格局分析</h3>
+                    <p><strong>眉：<span class="analysis-score">87/100</span></strong></p>
+                    <p>眉形清秀如新月，濃淡適宜，眉尾聚而不散，主性情溫和，人緣佳。</p>
+                    
+                    <p><strong>眼：<span class="analysis-score">90/100</span></strong></p>
+                    <p>雙目有神，黑白分明，眼尾微上揚，主智慧與決斷力。</p>
+                    
+                    <p><strong>鼻：<span class="analysis-score">89/100</span></strong></p>
+                    <p>鼻如懸膽，山根高起，準頭豐滿，為財運亨通之相。</p>
+                    
+                    <p><strong>口：<span class="analysis-score">83/100</span></strong></p>
+                    <p>唇色紅潤，嘴角微揚，牙齒整齊，主言而有信，食祿豐厚。</p>
+                    
+                    <p><strong>耳：<span class="analysis-score">85/100</span></strong></p>
+                    <p>耳高於眉，輪廓分明，耳垂厚大，主福壽雙全，智慧超群。</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="advice-tab">
+                <div class="ai-section">
+                    <h3>事業運勢建議</h3>
+                    <p>評分：<span class="analysis-score">88/100</span></p>
+                    <p>您的官祿宮(額頭)豐隆寬闊，配合高挺的鼻梁和適中的顴骨，顯示您具有領導才能和管理天賦。</p>
+                    <p><strong>發展建議：</strong></p>
+                    <ul>
+                        <li>適合從事管理、決策類工作，或自主創業</li>
+                        <li>35-50歲為事業黃金期，宜把握重要機會</li>
+                        <li>注意與屬馬、屬狗的人合作，易得貴人相助</li>
+                    </ul>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>財運分析與建議</h3>
+                    <p>評分：<span class="analysis-score">82/100</span></p>
+                    <p>鼻相顯示正財運旺盛，但鼻翼略顯單薄，需注意理財規劃。</p>
+                    <p><strong>理財建議：</strong></p>
+                    <ul>
+                        <li>適合房地產、教育、顧問服務等穩健型投資</li>
+                        <li>避免高風險投機行為，特別是年末三個月</li>
+                        <li>可考慮東南方位的財位布局，增強財運</li>
+                    </ul>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>健康運勢提醒</h3>
+                    <p>評分：<span class="analysis-score">85/100</span></p>
+                    <p>整體體質良好，但眼下微有青氣，需注意肝膽系統。</p>
+                    <p><strong>保健建議：</strong></p>
+                    <ul>
+                        <li>避免熬夜，保證23點前入睡</li>
+                        <li>春季宜多食綠色蔬菜，清肝明目</li>
+                        <li>定期進行有氧運動，增強心肺功能</li>
+                    </ul>
+                </div>
+                
+                <div class="disclaimer">
+                    <p><strong>重要提示：</strong>本分析依據《麻衣神相》傳統面相理論，僅供娛樂參考。人生運勢受個人努力、環境機遇等多種因素影響，請勿過度依賴面相分析。保持積極心態，腳踏實地，才是改變命運的根本之道。</p>
+                </div>
+            </div>
+        </div>
+        <div class="ai-footer">
+            <p>小高的麻衣相法遊戲屋 - AI面相分析系統 | 基於《麻衣神相》傳統面相理論</p>
+        </div>
+    </div>
 </div>
 
 <!-- ---------- 主程式 ---------- -->
@@ -171,6 +528,11 @@ const successMessage  = document.getElementById('successMessage');
 const sample1         = document.getElementById('sample1');
 const sample2         = document.getElementById('sample2');
 const sample3         = document.getElementById('sample3');
+const aiAnalysisBtn   = document.getElementById('aiAnalysisBtn');
+const aiModal         = document.getElementById('aiModal');
+const closeAiModal    = document.getElementById('closeAiModal');
+const tabs            = document.querySelectorAll('.tab');
+const tabContents     = document.querySelectorAll('.tab-content');
 
 /* ==== 全域變數 ==== */
 let markers = []; // 存儲標記點
@@ -215,6 +577,40 @@ resetBtn.addEventListener('click', resetMarkers);
 sample1.addEventListener('click', () => loadSampleImage('sample1'));
 sample2.addEventListener('click', () => loadSampleImage('sample2'));
 sample3.addEventListener('click', () => loadSampleImage('sample3'));
+
+// AI分析按鈕
+aiAnalysisBtn.addEventListener('click', () => {
+    aiModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+});
+
+// 關閉AI分析對話框
+closeAiModal.addEventListener('click', () => {
+    aiModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+});
+
+// 點擊對話框外部關閉
+window.addEventListener('click', (e) => {
+    if (e.target === aiModal) {
+        aiModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+});
+
+// 切換標籤
+tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        // 移除所有活動標籤
+        tabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        // 添加當前活動標籤
+        tab.classList.add('active');
+        const tabId = tab.getAttribute('data-tab');
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+    });
+});
 
 /* ==== 函數定義 ==== */
 // 處理文件選擇
