@@ -1146,38 +1146,37 @@
       }
     }
 
-    // ======== 計算比例 ========
+ ======== 計算比例 ========
     function calcRatios(lm) {
-  const w = canvas.width, h = canvas.height;
-  const getY = i => lm[i].y * h;
-  const getX = i => lm[i].x * w;
+      const w = canvas.width, h = canvas.height;
+      const getY = i => lm[i].y * h;
+      const getX = i => lm[i].x * w;
 
-  // 眉毛、鼻尖、下巴 Y 座標
-  const yBrow = getY(168);
-  const yNose = getY(2);
-  const yChin = getY(152);
+      // 眉毛、鼻尖、下巴 Y 座標
+      const yBrow = getY(168);
+      const yNose = getY(2);
+      const yChin = getY(152);
 
-  // 中庭高度
-  const midH = Math.abs(yNose - yBrow);
+      // 中庭高度
+      const midH = Math.abs(yNose - yBrow);
 
-  // ➜ 推估額頭點：眉毛往上 0.8 × 中庭
-  const yTop = yBrow - midH * 0.8;
+      // ➜ 推估額頭點：眉毛往上 0.8 × 中庭
+      const yTop = yBrow - midH * 0.8;
 
-  // 三庭高度
-  const topH = Math.abs(yBrow - yTop);
-  const lowH = Math.abs(yChin - yNose);
-  const sum  = topH + midH + lowH;
+      // 三庭高度
+      const topH = Math.abs(yBrow - yTop);
+      const lowH = Math.abs(yChin - yNose);
+      const sum  = topH + midH + lowH;
 
-  ratioTopEl.textContent  = (topH / sum).toFixed(2);
-  ratioMidEl.textContent  = (midH / sum).toFixed(2);
-  ratioLowEl.textContent  = (lowH / sum).toFixed(2);
+      ratioTopEl.textContent  = (topH / sum).toFixed(2);
+      ratioMidEl.textContent  = (midH / sum).toFixed(2);
+      ratioLowEl.textContent  = (lowH / sum).toFixed(2);
 
-  // 五眼比例
-  const faceW = Math.abs(getX(454) - getX(234));
-  const eyeW  = Math.abs(getX(133) - getX(33));
-  ratioFiveEyeEl.textContent = eyeW ? (faceW / eyeW).toFixed(2) : '--';
-}
-
+      // 五眼比例
+      const faceW = Math.abs(getX(454) - getX(234));
+      const eyeW  = Math.abs(getX(133) - getX(33));
+      ratioFiveEyeEl.textContent = eyeW ? (faceW / eyeW).toFixed(2) : '--';
+    }
     
     function resetRatiosDisplay() {
       ratioTopEl.textContent = '--';
@@ -1185,6 +1184,7 @@
       ratioLowEl.textContent = '--';
       ratioFiveEyeEl.textContent = '--';
     }
+
 
     // ======== 分析面相 ========
     function analyzeFace() {
@@ -1196,7 +1196,7 @@
       drawMeshAndScores();
     }
     
-    // ======== 繪圖與分數 ========
+   // ======== 繪圖與分數 ========
     function drawMesh() {
       if (!loadedImg || !landmarksCache) return;
       
@@ -1216,57 +1216,123 @@
       drawReferenceLines();
       
       // 特別標記關鍵點
-      function drawKeyPoints() {
-  const w = canvas.width, h = canvas.height;
-  const lm = landmarksCache;
+      drawKeyPoints(); // 調用繪製關鍵點函數
+    }
+    
+    // 繪製關鍵點函數
+    function drawKeyPoints() {
+      const w = canvas.width, h = canvas.height;
+      const lm = landmarksCache;
 
-  // 基準點
-  const browPoint = lm[168];
-  const nosePoint = lm[2];
-  const chinPoint = lm[152];
+      // 基準點
+      const browPoint = lm[168];
+      const nosePoint = lm[2];
+      const chinPoint = lm[152];
 
-  // ➜ 推估額頭點
-  const midH = (nosePoint.y - browPoint.y) * h;
-  const yForehead = browPoint.y * h - midH * 0.8;
-  const xForehead = browPoint.x * w;
+      // ➜ 推估額頭點
+      const midH = (nosePoint.y - browPoint.y) * h;
+      const yForehead = browPoint.y * h - midH * 0.8;
+      const xForehead = browPoint.x * w;
 
-  // ▓ 推估額頭點 (綠)
-  ctx.fillStyle = '#00ff00';
-  ctx.beginPath();
-  ctx.arc(xForehead, yForehead, 8, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.fillText('推估額頭點', xForehead + 10, yForehead);
+      // ▓ 推估額頭點 (綠)
+      ctx.fillStyle = '#00ff00';
+      ctx.beginPath();
+      ctx.arc(xForehead, yForehead, 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('推估額頭點', xForehead + 10, yForehead);
 
-  // ▓ 眉毛 (橙)
-  ctx.fillStyle = '#ff9900';
-  ctx.beginPath();
-  ctx.arc(browPoint.x * w, browPoint.y * h, 8, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.fillStyle = '#000';
-  ctx.fillText('眉毛點(168)', browPoint.x * w + 10, browPoint.y * h);
+      // ▓ 眉毛 (橙)
+      ctx.fillStyle = '#ff9900';
+      ctx.beginPath();
+      ctx.arc(browPoint.x * w, browPoint.y * h, 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.fillText('眉毛點(168)', browPoint.x * w + 10, browPoint.y * h);
 
-  // ▓ 鼻尖 (紅)
-  ctx.fillStyle = '#ff3366';
-  ctx.beginPath();
-  ctx.arc(nosePoint.x * w, nosePoint.y * h, 8, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.fillStyle = '#000';
-  ctx.fillText('鼻尖點(2)', nosePoint.x * w + 10, nosePoint.y * h);
+      // ▓ 鼻尖 (紅)
+      ctx.fillStyle = '#ff3366';
+      ctx.beginPath();
+      ctx.arc(nosePoint.x * w, nosePoint.y * h, 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.fillText('鼻尖點(2)', nosePoint.x * w + 10, nosePoint.y * h);
 
-  // ▓ 下巴 (紫)
-  ctx.fillStyle = '#9c4dff';
-  ctx.beginPath();
-  ctx.arc(chinPoint.x * w, chinPoint.y * h, 8, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.fillStyle = '#000';
-  ctx.fillText('下巴點(152)', chinPoint.x * w + 10, chinPoint.y * h);
-}
+      // ▓ 下巴 (紫)
+      ctx.fillStyle = '#9c4dff';
+      ctx.beginPath();
+      ctx.arc(chinPoint.x * w, chinPoint.y * h, 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.fillText('下巴點(152)', chinPoint.x * w + 10, chinPoint.y * h);
+    }
 
     function drawMeshAndScores() {
       drawMesh();
       
       // 產生分數
       generateFaceScores();
+      
+      // 顯示結果
+      scoreBox.style.display = 'block';
+      entertainmentResult.style.display = 'none';
+      
+      // 觸發動畫
+      document.querySelectorAll('.fade-in').forEach(el => {
+        el.style.animation = 'fadeIn 0.8s ease forwards';
+      });
+    }
+    
+    function drawReferenceLines() {
+      const w = canvas.width, h = canvas.height;
+      const lm = landmarksCache;
+      const getY = i => lm[i].y * h;
+      const getX = i => lm[i].x * w;
+      
+      ctx.strokeStyle = '#5d8bf9';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      
+      // 🟢 推估額頭水平線（用眉毛與鼻尖距離向上推估）
+      const browY = getY(168);      // 眉毛中心
+      const noseY = getY(2);        // 鼻尖
+      const midH = Math.abs(noseY - browY); // 中庭距離
+
+      const foreheadY = browY - midH * 0.8; // 推估髮際線位置
+
+      ctx.strokeStyle = '#00ff00';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, foreheadY);
+      ctx.lineTo(w, foreheadY);
+      ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px sans-serif';
+      ctx.fillText('推估額頭線', 10, foreheadY - 5);
+
+      ctx.strokeStyle = '#5d8bf9';
+      ctx.beginPath();
+      ctx.moveTo(0, browY);
+      ctx.lineTo(w, browY);
+      
+      ctx.moveTo(0, noseY);
+      ctx.lineTo(w, noseY);
+      
+      ctx.moveTo(0, getY(152));
+      ctx.lineTo(w, getY(152));
+      
+      // 五眼垂直線
+      const eyePoints = [33, 133, 263, 362, 454];
+      eyePoints.forEach(i => {
+        ctx.moveTo(getX(i), 0);
+        ctx.lineTo(getX(i), h);
+      });
+      
+      ctx.stroke();
+    }
+    
+    function generateFaceScores() {
       
       // 顯示結果
       scoreBox.style.display = 'block';
