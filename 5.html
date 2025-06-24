@@ -1304,11 +1304,21 @@ ctx.fillText('推估額頭點', xForehead + 10, yForehead);
       ctx.strokeStyle = '#5d8bf9';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      
-      // 三庭水平線 - 使用索引9作為額頭頂部
-      ctx.moveTo(0, getY(9));
-      ctx.lineTo(w, getY(9));
-      
+  // 🟢 推估額頭水平線（用眉毛與鼻尖距離向上推估）
+const browY = getY(168);      // 眉毛中心
+const noseY = getY(2);        // 鼻尖
+const midH = Math.abs(noseY - browY); // 中庭距離
+
+const foreheadY = browY - midH * 0.9; // 推估髮際線位置
+
+ctx.strokeStyle = '#00ff00';
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.moveTo(0, foreheadY);
+ctx.lineTo(w, foreheadY);
+ctx.stroke();
+ctx.fillText('推估額頭線', 10, foreheadY - 5);
+
       ctx.moveTo(0, getY(168));
       ctx.lineTo(w, getY(168));
       
