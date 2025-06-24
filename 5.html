@@ -1146,7 +1146,7 @@
       }
     }
 
- ======== 計算比例 ========
+    // ======== 計算比例 ========
     function calcRatios(lm) {
       const w = canvas.width, h = canvas.height;
       const getY = i => lm[i].y * h;
@@ -1185,7 +1185,6 @@
       ratioFiveEyeEl.textContent = '--';
     }
 
-
     // ======== 分析面相 ========
     function analyzeFace() {
       if (!landmarksCache) {
@@ -1196,7 +1195,7 @@
       drawMeshAndScores();
     }
     
-   // ======== 繪圖與分數 ========
+    // ======== 繪圖與分數 ========
     function drawMesh() {
       if (!loadedImg || !landmarksCache) return;
       
@@ -1230,7 +1229,7 @@
       const chinPoint = lm[152];
 
       // ➜ 推估額頭點
-      const midH = (nosePoint.y - browPoint.y) * h;
+      const midH = (nosePoint.y * h - browPoint.y * h);
       const yForehead = browPoint.y * h - midH * 0.8;
       const xForehead = browPoint.x * w;
 
@@ -1294,11 +1293,12 @@
       ctx.lineWidth = 2;
       ctx.beginPath();
       
+      // 眉毛、鼻尖點
+      const browY = getY(168);
+      const noseY = getY(2);
+      
       // 🟢 推估額頭水平線（用眉毛與鼻尖距離向上推估）
-      const browY = getY(168);      // 眉毛中心
-      const noseY = getY(2);        // 鼻尖
       const midH = Math.abs(noseY - browY); // 中庭距離
-
       const foreheadY = browY - midH * 0.8; // 推估髮際線位置
 
       ctx.strokeStyle = '#00ff00';
@@ -1318,77 +1318,6 @@
       
       ctx.moveTo(0, noseY);
       ctx.lineTo(w, noseY);
-      
-      ctx.moveTo(0, getY(152));
-      ctx.lineTo(w, getY(152));
-      
-      // 五眼垂直線
-      const eyePoints = [33, 133, 263, 362, 454];
-      eyePoints.forEach(i => {
-        ctx.moveTo(getX(i), 0);
-        ctx.lineTo(getX(i), h);
-      });
-      
-      ctx.stroke();
-    }
-    
-    function generateFaceScores() {
-      
-      // 顯示結果
-      scoreBox.style.display = 'block';
-      entertainmentResult.style.display = 'none';
-      
-      // 觸發動畫
-      document.querySelectorAll('.fade-in').forEach(el => {
-        el.style.animation = 'fadeIn 0.8s ease forwards';
-      });
-    }
-    
-    function drawReferenceLines() {
-      const w = canvas.width, h = canvas.height;
-      const lm = landmarksCache;
-      const getY = i => lm[i].y * h;
-      const getX = i => lm[i].x * w;
-      
-      ctx.strokeStyle = '#5d8bf9';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-  // －－－新增／取代額頭線區塊－－－
-const browY  = getY(168);
-const noseY  = getY(2);
-const midH   = Math.abs(noseY - browY);
-const foreheadY = browY - midH * 0.8;   // 與 calcRatios 一致
-
-ctx.strokeStyle = '#00ff00';
-ctx.lineWidth   = 2;
-ctx.beginPath();
-ctx.moveTo(0, foreheadY);
-ctx.lineTo(canvas.width, foreheadY);    // ← 不要再用未定義的 w
-ctx.stroke();
-ctx.fillText('推估額頭線', 10, foreheadY - 5);
-
-      // 🟢 推估額頭水平線（用眉毛與鼻尖距離向上推估）
-      
-const browY = getY(168);      // 眉毛中心
-const noseY = getY(2);        // 鼻尖
-const midH = Math.abs(noseY - browY); // 中庭距離
-
-const foreheadY = browY - midH * 0.9; // 推估髮際線位置
-
-ctx.strokeStyle = '#00ff00';
-ctx.lineWidth = 2;
-ctx.beginPath();
-ctx.moveTo(0, foreheadY);
-ctx.lineTo(canvas.width, foreheadY);
-
-ctx.stroke();
-ctx.fillText('推估額頭線', 10, foreheadY - 5);
-
-      ctx.moveTo(0, getY(168));
-      ctx.lineTo(w, getY(168));
-      
-      ctx.moveTo(0, getY(2));
-      ctx.lineTo(w, getY(2));
       
       ctx.moveTo(0, getY(152));
       ctx.lineTo(w, getY(152));
