@@ -3,308 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>麻衣相法遊戲屋 - AI面相分析</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>小高的麻衣相法遊戲屋 - AI面相分析</title>
     <style>
-        :root {
-            --primary-color: #8e3b1d;
-            --secondary-color: #d9a566;
-            --accent-color: #b22222;
-            --dark-bg: #1a120b;
-            --light-bg: #f5e8c9;
-            --text-dark: #3c2a21;
-            --text-light: #f9f5eb;
-        }
+        /* ---------- 版面與配色 ---------- */
+        *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI','Microsoft JhengHei',sans-serif;}
+        body{background:linear-gradient(135deg,#1a2a6c,#b21f1f,#1a2a6c);color:#fff;min-height:100vh;padding:20px;background-attachment:fixed;}
+        .container{max-width:1000px;margin:0 auto;background:rgba(0,0,30,.85);border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.5);overflow:hidden;border:1px solid #4f8bf9;}
+        header{background:rgba(0,20,60,.9);padding:25px;text-align:center;border-bottom:3px solid #4f8bf9;position:relative;}
+        h1{font-size:2.5rem;margin-bottom:10px;color:#4f8bf9;text-shadow:0 2px 4px rgba(0,0,0,.5);}
+        .subtitle{font-size:1.2rem;opacity:.9;max-width:600px;margin:0 auto;}
+        .main-content{display:flex;flex-wrap:wrap;padding:20px;}
+        .upload-section,.result-section{flex:1;min-width:300px;padding:20px;background:rgba(10,25,60,.7);border-radius:15px;margin:10px;}
+        h2{color:#4f8bf9;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #4f8bf9;}
+        .upload-area{border:3px dashed #4f8bf9;border-radius:15px;padding:30px;text-align:center;cursor:pointer;transition:.3s;margin-bottom:20px;background:rgba(20,40,80,.4);}
+        .upload-area:hover{background:rgba(30,60,120,.5);transform:translateY(-3px);}
+        .upload-icon{font-size:4rem;margin-bottom:15px;color:#4f8bf9;}
+        .btn{background:linear-gradient(to right,#4f8bf9,#6a5af9);color:#fff;border:none;padding:14px 28px;font-size:1.1rem;border-radius:50px;cursor:pointer;transition:.3s;display:block;width:100%;margin:20px 0;font-weight:bold;letter-spacing:1px;box-shadow:0 5px 15px rgba(0,0,0,.3);}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.4);}
+        .btn:active{transform:translateY(1px);}
+        .btn:disabled{background:#555;cursor:not-allowed;transform:none;box-shadow:none;}
+        #imagePreview{max-width:100%;max-height:500px;border-radius:10px;background:#0a1429;margin-top:15px;display:none;border:2px solid #4f8bf9;object-fit:contain;}
+        .result-box{background:rgba(20,40,80,.4);border-radius:15px;padding:20px;margin-top:20px;border:2px solid #4f8bf9;}
+        .result-item{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(79,139,249,.3);}
+        .result-item:last-child{border-bottom:none;}
+        .progress-container{height:20px;background:rgba(0,0,0,.3);border-radius:10px;margin:10px 0 20px;overflow:hidden;}
+        .progress-bar{height:100%;background:linear-gradient(to right,#4f8bf9,#6a5af9);border-radius:10px;width:0%;transition:width 1s ease-in-out;}
+        footer{text-align:center;padding:20px;background:rgba(0,20,60,.9);margin-top:20px;border-top:1px solid #4f8bf9;}
+        .note{font-size:.9rem;opacity:.7;margin-top:5px;}
+        .ai-analysis-intro{background:rgba(20,40,80,.4);border-radius:10px;padding:15px;margin:15px 0;border-left:4px solid #4f8bf9;text-align:center;}
+        .image-container{position:relative;display:inline-block;margin:10px 0;max-width:100%;text-align:center;}
+        @media(max-width:768px){.main-content{flex-direction:column;}h1{font-size:2rem;}}
+        .interpretation{margin-top:20px;padding:15px;background:rgba(20,40,80,.4);border-radius:10px;border-left:4px solid #4f8bf9;}
+        .interpretation h3{color:#4f8bf9;margin-bottom:10px;}
+        .interpretation p{margin-bottom:10px;}
+        .sample-images{display:flex;justify-content:space-around;flex-wrap:wrap;margin-top:20px;gap:15px;}
+        .sample-image{width:120px;height:120px;border-radius:10px;cursor:pointer;border:2px solid #4f8bf9;object-fit:cover;transition:.3s;}
+        .sample-image:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(0,0,0,.3);}
+        .sample-container{text-align:center;margin-top:20px;}
+        .decoration{position:absolute;top:20px;right:20px;font-size:2.5rem;opacity:.5;}
+        .game-house-title{color:#ffcc00;text-shadow:0 0 10px rgba(255,204,0,.5);}
+        .ratio-fix-note{color:#ffcc00;font-size:.9rem;margin-top:10px;display:block;}
+        .ai-btn{background: linear-gradient(to right, #ffcc00, #ff9900);color:#1a1a40;border:none;padding:15px 30px;font-size:1.1rem;border-radius:50px;cursor:pointer;transition:.3s;display:block;margin:20px auto;font-weight:bold;letter-spacing:1px;box-shadow:0 5px 15px rgba(0,0,0,.3);}
+        .ai-btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.5);}
         
-        * {
-            margin: 0;
-            padding: 0;
+        /* AI分析对话框样式 */
+        .ai-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            overflow: auto;
+            padding: 20px;
             box-sizing: border-box;
-            font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
         }
         
-        body {
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%231a120b"/><path d="M0,0 L100,100 M100,0 L0,100" stroke="%233c2a21" stroke-width="0.5"/></svg>');
-            color: var(--text-light);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            background: linear-gradient(to bottom, #2c1a0d, #1a120b);
+        .ai-content {
+            background: linear-gradient(135deg, #1a1a40, #0d0d26);
+            max-width: 900px;
+            margin: 40px auto;
             border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            border: 2px solid #4f8bf9;
             overflow: hidden;
-            border: 2px solid var(--secondary-color);
-            position: relative;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.7);
         }
         
-        /* 装饰元素 - 传统图案 */
-        .decoration {
-            position: absolute;
-            opacity: 0.1;
-            pointer-events: none;
-        }
-        
-        .decoration.top-left {
-            top: 20px;
-            left: 20px;
-            font-size: 80px;
-            transform: rotate(-15deg);
-        }
-        
-        .decoration.bottom-right {
-            bottom: 20px;
-            right: 20px;
-            font-size: 80px;
-            transform: rotate(15deg);
-        }
-        
-        header {
-            background: rgba(60, 42, 33, 0.7);
-            padding: 25px;
-            text-align: center;
-            border-bottom: 3px solid var(--secondary-color);
-            position: relative;
-            z-index: 2;
-        }
-        
-        h1 {
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            color: var(--secondary-color);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-            letter-spacing: 2px;
-            position: relative;
-            display: inline-block;
-        }
-        
-        h1:after {
-            content: "";
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 120px;
-            height: 3px;
-            background: var(--accent-color);
-            border-radius: 2px;
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            max-width: 600px;
-            margin: 10px auto 0;
-            color: #d9a566;
-            font-style: italic;
-        }
-        
-        .main-content {
-            display: flex;
-            flex-wrap: wrap;
-            padding: 30px;
-            gap: 30px;
-            position: relative;
-            z-index: 2;
-        }
-        
-        .upload-section, .result-section {
-            flex: 1;
-            min-width: 300px;
-            padding: 25px;
-            background: rgba(40, 28, 21, 0.7);
-            border-radius: 15px;
-            border: 1px solid rgba(217, 165, 102, 0.3);
-        }
-        
-        .result-section {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        h2 {
-            color: var(--secondary-color);
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--accent-color);
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        h2 i {
-            font-size: 1.5rem;
-        }
-        
-        .upload-area {
-            border: 3px dashed var(--secondary-color);
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-bottom: 25px;
-            background: rgba(28, 20, 13, 0.5);
-            position: relative;
-            min-height: 250px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .upload-area:hover {
-            background: rgba(60, 42, 33, 0.6);
-            transform: translateY(-5px);
-        }
-        
-        .upload-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: var(--secondary-color);
-            transition: transform 0.3s;
-        }
-        
-        .upload-area:hover .upload-icon {
-            transform: scale(1.1);
-        }
-        
-        .btn, .ai-btn, .control-btn {
-            border: none;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: bold;
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .btn, .control-btn {
-            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
-            color: var(--text-light);
-            padding: 16px 30px;
-            border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-            width: 100%;
-            margin: 20px 0;
-            font-size: 1.1rem;
-        }
-        
-        .btn:disabled {
-            background: #555;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-            opacity: 0.7;
-        }
-        
-        .ai-btn {
-            background: linear-gradient(to right, #d9a566, #b8860b);
-            color: var(--text-dark);
-            padding: 17px 35px;
-            border-radius: 50px;
-            display: block;
-            margin: 25px auto;
-            font-size: 1.2rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-            font-weight: 700;
-        }
-        
-        .ai-btn:hover, .btn:hover, .control-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-        }
-        
-        .face-canvas-container {
-            position: relative;
-            width: 100%;
-            margin: 20px 0;
-            text-align: center;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        #faceCanvas {
-            max-width: 100%;
-            max-height: 400px;
-            border: 2px solid var(--secondary-color);
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            margin: 0 auto;
-            display: block;
-        }
-        
-        .analysis-result {
-            background: rgba(28, 20, 13, 0.7);
-            border-radius: 10px;
+        .ai-header {
+            background: rgba(0,30,70,0.9);
             padding: 20px;
-            margin-top: 20px;
-            border: 1px solid rgba(217, 165, 102, 0.3);
-            flex: 1;
-            overflow-y: auto;
-            max-height: 300px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #4f8bf9;
         }
         
-        .analysis-result h3 {
-            color: var(--secondary-color);
+        .ai-header h2 {
+            color: #ffcc00;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .close-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .close-btn:hover {
+            color: #ff4d4d;
+            transform: scale(1.2);
+        }
+        
+        .ai-body {
+            padding: 25px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .ai-section {
+            margin-bottom: 30px;
+            background: rgba(10,20,50,0.5);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #4f8bf9;
+        }
+        
+        .ai-section h3 {
+            color: #4f8bf9;
+            margin-top: 0;
             margin-bottom: 15px;
-            text-align: center;
             font-size: 1.4rem;
         }
         
-        .trait-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+        .ai-section p {
+            line-height: 1.7;
+            margin-bottom: 10px;
         }
         
-        .trait-card {
-            background: rgba(60, 42, 33, 0.5);
-            border-radius: 10px;
+        .analysis-score {
+            display: inline-block;
+            background: #4f8bf9;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .score-bar {
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f8bf9, #6a5af9);
+            border-radius: 5px;
+        }
+        
+        .disclaimer {
+            background: rgba(200,0,0,0.1);
+            border: 1px solid rgba(255,0,0,0.3);
             padding: 15px;
-            border-left: 3px solid var(--accent-color);
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.9rem;
         }
         
-        .trait-card h4 {
-            color: var(--secondary-color);
-            margin-bottom: 8px;
+        .analysis-title {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .analysis-title h2 {
+            color: #ffcc00;
+            font-size: 2rem;
+            display: inline-block;
+            padding: 0 20px;
+            background: rgba(0,30,70,0.9);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .analysis-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #4f8bf9, transparent);
+            z-index: 1;
+        }
+        
+        .ai-footer {
+            padding: 15px;
+            text-align: center;
+            background: rgba(0,20,40,0.7);
+            border-top: 1px solid #4f8bf9;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+            background: rgba(0,20,40,0.5);
+            border-radius: 50px;
+            padding: 5px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: 0.3s;
+        }
+        
+        .tab.active {
+            background: linear-gradient(to right, #4f8bf9, #6a5af9);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .analysis-indicator {
             display: flex;
             align-items: center;
-            gap: 8px;
+            margin-bottom: 10px;
         }
         
-        .trait-card p {
-            font-size: 0.95rem;
-            line-height: 1.5;
+        .indicator-label {
+            width: 120px;
         }
         
-        .loading {
-            display: none;
+        .indicator-bar {
+            flex-grow: 1;
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .indicator-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f8bf9, #6a5af9);
+            border-radius: 5px;
+        }
+        
+        .indicator-value {
+            width: 50px;
+            text-align: right;
+            margin-left: 10px;
+        }
+        
+        .analysis-loading {
             text-align: center;
-            padding: 20px;
+            padding: 40px;
         }
         
         .spinner {
-            border: 5px solid rgba(217, 165, 102, 0.3);
-            border-top: 5px solid var(--secondary-color);
+            border: 5px solid rgba(255,255,255,0.1);
+            border-top: 5px solid #4f8bf9;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            margin: 0 auto 20px;
         }
         
         @keyframes spin {
@@ -312,775 +275,747 @@
             100% { transform: rotate(360deg); }
         }
         
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        /* 娛樂面相結果樣式 */
+        .entertainment-result {
+            background: rgba(30, 15, 60, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid #9c4dff;
+            display: none;
         }
         
-        .legend {
+        .entertainment-header {
+            color: #ffcc00;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+        }
+        
+        .entertainment-feature {
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(100, 50, 150, 0.3);
+            border-radius: 10px;
+            border-left: 3px solid #9c4dff;
+        }
+        
+        .entertainment-tags {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-top: 15px;
             flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
         }
         
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
+        .entertainment-tag {
+            background: linear-gradient(to right, #9c4dff, #6a5af9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
         }
         
-        .legend-color {
-            width: 15px;
-            height: 15px;
-            border-radius: 3px;
-        }
-        
-        .face-shape {
-            background: #4f8bf9;
-        }
-        
-        .eyes {
-            background: #ff6b6b;
-        }
-        
-        .nose {
-            background: #1dd1a1;
-        }
-        
-        .mouth {
-            background: #feca57;
-        }
-        
-        .jaw {
-            background: #5f27cd;
-        }
-        
-        .instructions {
-            background: rgba(217, 165, 102, 0.1);
+        .entertainment-quote {
+            font-style: italic;
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 215, 0, 0.1);
             border-radius: 10px;
+            margin: 20px 0;
+            border-left: 3px solid #ffcc00;
+        }
+        
+        .entertainment-disclaimer {
+            background: rgba(200,0,0,0.1);
+            border: 1px solid rgba(255,0,0,0.3);
             padding: 15px;
+            border-radius: 10px;
             margin-top: 20px;
-            border: 1px solid rgba(217, 165, 102, 0.3);
+            font-size: 0.9rem;
+            text-align: center;
         }
         
-        .instructions h4 {
-            color: var(--secondary-color);
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .instructions ul {
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-        }
-        
-        .error-box {
-            background: rgba(178, 34, 34, 0.2);
-            border: 1px solid var(--accent-color);
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            display: none;
-        }
-        
-        .error-title {
-            color: #ff6b6b;
+        .entertainment-btn {
+            background: linear-gradient(to right, #9c4dff, #6a5af9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: block;
+            margin: 20px auto;
             font-weight: bold;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         
-        .solution-box {
-            background: rgba(29, 209, 161, 0.2);
-            border: 1px solid #1dd1a1;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            display: none;
-        }
-        
-        .solution-title {
-            color: #1dd1a1;
-            font-weight: bold;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-            }
-            
-            h1 {
-                font-size: 2.2rem;
-            }
-            
-            .upload-section, .result-section {
-                min-width: 100%;
-            }
-            
-            .trait-list {
-                grid-template-columns: 1fr;
-            }
+        .entertainment-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="decoration top-left">囍</div>
-        <div class="decoration bottom-right">福</div>
-        
-        <header>
-            <h1><i class="fas fa-mask"></i> 麻衣相法遊戲屋</h1>
-            <p class="subtitle">基於千年《麻衣神相》理論的AI面相分析系統</p>
-        </header>
+<div class="container">
+    <header>
+        <h1><span class="game-house-title">小高的麻衣相法遊戲屋</span></h1>
+        <p class="subtitle">AI面相分析 - 基於《麻衣神相》傳統面相理論</p>
+        <div class="decoration">☯</div>
+    </header>
 
-        <div class="main-content">
-            <div class="upload-section">
-                <h2><i class="fas fa-upload"></i> 面相分析步驟</h2>
-                
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon"><i class="fas fa-camera"></i></div>
-                    <p>點擊或拖放正面清晰的面部照片到這裡</p>
-                    <p class="small">(建議使用光線良好的正面照片)</p>
-                    <input type="file" id="fileInput" accept="image/*" hidden />
-                </div>
-                
-                <div class="error-box" id="errorBox">
-                    <div class="error-title"><i class="fas fa-exclamation-triangle"></i> 分析失敗原因</div>
-                    <p id="errorMessage">模型加載失敗，請檢查網絡連接或刷新頁面重試</p>
-                </div>
-                
-                <div class="solution-box" id="solutionBox">
-                    <div class="solution-title"><i class="fas fa-lightbulb"></i> 解決方案</div>
-                    <p id="solutionMessage">1. 確保您的設備已連接網絡<br>2. 刷新頁面重新加載模型<br>3. 使用Chrome或Firefox瀏覽器</p>
-                </div>
-                
-                <div class="instructions">
-                    <h4><i class="fas fa-info-circle"></i> 上傳須知</h4>
-                    <ul>
-                        <li>請上傳清晰、正面的臉部照片</li>
-                        <li>避免戴眼鏡、帽子或過多飾品</li>
-                        <li>保持自然表情，勿做誇張表情</li>
-                        <li>系統將分析額頭、眉眼、鼻、口、下巴等特徵</li>
-                    </ul>
-                </div>
-
-                <button class="ai-btn" id="aiAnalysisBtn" disabled>
-                    <i class="fas fa-magic"></i> 開始面相分析
-                </button>
-                
-                <div class="controls">
-                    <button class="control-btn" id="toggleMeshBtn">
-                        <i class="fas fa-border-all"></i> 顯示/隱藏分析網格
-                    </button>
-                    <button class="control-btn" id="exportJsonBtn">
-                        <i class="fas fa-download"></i> 匯出分析報告
-                    </button>
-                </div>
+    <div class="main-content">
+        <!-- ▲▲ 上傳區 ▲▲ -->
+        <div class="upload-section">
+            <h2>上傳照片</h2>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📷</div>
+                <p>點擊或拖放面部照片到這裡</p>
+                <p class="note">(正面清晰照片效果最佳)</p>
+                <span class="ratio-fix-note">✓ 自動AI面部識別技術</span>
+                <input type="file" id="fileInput" accept="image/*" style="display:none;">
             </div>
 
-            <div class="result-section">
-                <h2><i class="fas fa-chart-line"></i> 分析結果</h2>
-                
-                <div class="face-canvas-container">
-                    <canvas id="faceCanvas" width="500" height="500"></canvas>
-                    
-                    <div class="legend">
-                        <div class="legend-item">
-                            <div class="legend-color face-shape"></div>
-                            <span>臉型輪廓</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color eyes"></div>
-                            <span>眉眼特徵</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color nose"></div>
-                            <span>鼻相分析</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color mouth"></div>
-                            <span>口唇分析</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-color jaw"></div>
-                            <span>下巴分析</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="analysis-result" id="analysisResult">
-                    <h3><i class="fas fa-scroll"></i> 面相分析報告</h3>
-                    <p class="waiting-text">請上傳照片並點擊"開始面相分析"按鈕</p>
-                    
-                    <div class="trait-list" id="traitList" style="display:none">
-                        <!-- 面相特徵將由JS動態生成 -->
-                    </div>
+            <div class="ai-analysis-intro">
+                <p>上傳照片後，點擊下方按鈕進行AI面相分析</p>
+                <p class="note">系統將自動分析面部特徵，無需手動標記點</p>
+            </div>
+
+            <button class="ai-btn" id="aiAnalysisBtn" disabled>小高的AI面相分析</button>
+            
+            <!-- 新增娛樂面相按鈕 -->
+            <button class="entertainment-btn" id="entertainmentBtn">生成娛樂面相劇本</button>
+
+            <div id="imageContainer" class="image-container">
+                <img id="imagePreview" alt="面部照片預覽">
+            </div>
+
+            <!-- 範例圖片 -->
+            <div class="sample-container">
+                <h3>範例圖片</h3>
+                <p class="note">點擊下方範例圖片快速體驗分析功能</p>
+                <div class="sample-images">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&w=200" alt="範例1" class="sample-image" id="sample1">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&w=200" alt="範例2" class="sample-image" id="sample2">
+                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=200&w=200" alt="範例3" class="sample-image" id="sample3">
                 </div>
             </div>
         </div>
-        
-        <div class="loading" id="loadingIndicator">
-            <div class="spinner"></div>
-            <p>AI正在分析面相，解讀命運玄機...</p>
+
+        <!-- ▲▲ 結果區 ▲▲ -->
+        <div class="result-section">
+            <h2>AI分析結果</h2>
+            <div id="initialMessage">
+                <div class="result-box">
+                    <p>上傳面部照片後，點擊「小高的AI面相分析」按鈕。</p>
+                    <p class="note">本工具完全在瀏覽器中運行，不會上傳任何資料至伺服器。</p>
+                    
+                    <div class="interpretation">
+                        <h3>面相分析原理</h3>
+                        <p>基於《麻衣神相》傳統面相理論，系統將自動分析：</p>
+                        <ul>
+                            <li>三庭比例（額頭、眉眼鼻、口下巴）</li>
+                            <li>五官格局（眉、眼、鼻、口、耳）</li>
+                            <li>五岳格局（額、鼻、下巴、左右顴）</li>
+                            <li>氣色與紋路分析</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-box" id="resultBox" style="display:none;">
+                <div class="result-item">
+                    <span>整體格局評價</span><span id="overallScore">--</span>
+                </div>
+                <div class="progress-container"><div class="progress-bar" id="overallBar"></div></div>
+
+                <div class="result-item">
+                    <span>事業運勢</span><span id="careerScore">--</span>
+                </div>
+                <div class="progress-container"><div class="progress-bar" id="careerBar"></div></div>
+
+                <div class="result-item">
+                    <span>財富運勢</span><span id="wealthScore">--</span>
+                </div>
+                <div class="progress-container"><div class="progress-bar" id="wealthBar"></div></div>
+
+                <div class="result-item">
+                    <span>健康運勢</span><span id="healthScore">--</span>
+                </div>
+                <div class="progress-container"><div class="progress-bar" id="healthBar"></div></div>
+
+                <div class="interpretation" id="interpretation">
+                    <h3>面相解讀</h3>
+                    <p>請上傳照片後點擊AI分析按鈕</p>
+                </div>
+            </div>
+            
+            <!-- 新增娛樂面相結果區域 -->
+            <div class="entertainment-result" id="entertainmentResult">
+                <div class="entertainment-header">🎭 AI面相劇本生成</div>
+                
+                <div class="entertainment-feature">
+                    <h3>🌜 您的面相特徵</h3>
+                    <p id="entertainmentFeatures">特徵生成中...</p>
+                </div>
+                
+                <div class="entertainment-quote" id="entertainmentQuote">
+                    "古籍引文生成中..."
+                </div>
+                
+                <div class="entertainment-tags" id="entertainmentTags">
+                    <!-- 標籤將由JS動態生成 -->
+                </div>
+                
+                <div class="entertainment-disclaimer">
+                    ⚠️ 免責聲明：本分析為AI娛樂生成，無科學依據。相由心生，福自我求。
+                </div>
+                
+                <button class="entertainment-btn" onclick="generateEntertainmentReading()">重新生成劇本</button>
+                <button class="entertainment-btn" onclick="shareResult()">分享我的面相劇本</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        // 初始化DOM元素
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const aiBtn = document.getElementById('aiAnalysisBtn');
-        const meshBtn = document.getElementById('toggleMeshBtn');
-        const exportBtn = document.getElementById('exportJsonBtn');
-        const canvas = document.getElementById('faceCanvas');
-        const ctx = canvas.getContext('2d');
-        const analysisResult = document.getElementById('analysisResult');
-        const traitList = document.getElementById('traitList');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const waitingText = analysisResult.querySelector('.waiting-text');
-        const errorBox = document.getElementById('errorBox');
-        const errorMessage = document.getElementById('errorMessage');
-        const solutionBox = document.getElementById('solutionBox');
-        const solutionMessage = document.getElementById('solutionMessage');
+    <footer>
+        <p>小高的麻衣相法遊戲屋 v3.0 | 繁體版 | AI面相分析</p>
+        <p class="note">注意：本工具僅供娛樂參考，實際面相分析需專業人士進行</p>
+    </footer>
+</div>
 
-        // 全局變量
-        let loadedImage = null;
-        let faceDetection = null;
-        let showMesh = true;
-        let modelsLoaded = false;
-        let analysisData = {
-            faceShape: '',
-            forehead: '',
-            eyebrows: '',
-            eyes: '',
-            nose: '',
-            mouth: '',
-            jaw: '',
-            overall: ''
-        };
-
-        // 初始化face-api.js模型
-        async function initFaceAPI() {
-            try {
-                // 使用正確的模型路徑
-                await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-                    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-                    faceapi.nets.faceExpressionNet.loadFromUri('/models')
-                ]);
-                console.log('FaceAPI models loaded');
-                modelsLoaded = true;
-            } catch (e) {
-                console.error('Error loading FaceAPI models:', e);
-                showError('模型加載失敗', '請檢查網絡連接或刷新頁面重試');
-            }
-        }
-
-        // 顯示錯誤信息
-        function showError(title, message, solution) {
-            errorMessage.innerHTML = `<strong>${title}:</strong> ${message}`;
-            solutionMessage.innerHTML = solution || '請嘗試刷新頁面或稍後再試';
-            errorBox.style.display = 'block';
-            solutionBox.style.display = 'block';
-        }
-
-        // 隱藏錯誤信息
-        function hideError() {
-            errorBox.style.display = 'none';
-            solutionBox.style.display = 'none';
-        }
-
-        // 初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            initFaceAPI();
-        });
-
-        // 上傳處理
-        uploadArea.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', handleFile);
-        
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = 'rgba(90, 63, 48, 0.6)';
-        });
-        
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.background = 'rgba(28, 20, 13, 0.5)';
-        });
-        
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.background = 'rgba(28, 20, 13, 0.5)';
-            if (e.dataTransfer.files.length) {
-                fileInput.files = e.dataTransfer.files;
-                handleFile();
-            }
-        });
-
-        function handleFile() {
-            hideError();
-            const file = fileInput.files[0];
-            if (!file || !file.type.match('image.*')) return alert('請選擇有效的圖片檔');
+<!-- AI分析对话框 -->
+<div id="aiModal" class="ai-modal">
+    <div class="ai-content">
+        <div class="ai-header">
+            <h2>小高的AI面相分析</h2>
+            <button class="close-btn" id="closeAiModal">&times;</button>
+        </div>
+        <div class="ai-body">
+            <div class="analysis-title">
+                <h2>基於《麻衣神相》的專業面相分析</h2>
+            </div>
             
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    // 調整Canvas大小
-                    const maxSize = 500;
-                    let width = img.width;
-                    let height = img.height;
+            <div class="tab-container">
+                <div class="tab active" data-tab="summary">整體分析</div>
+                <div class="tab" data-tab="details">詳細報告</div>
+                <div class="tab" data-tab="advice">運勢建議</div>
+            </div>
+            
+            <div class="tab-content active" id="summary-tab">
+                <div class="ai-section">
+                    <h3>整體格局評價</h3>
+                    <p>根據《麻衣神相》理論分析，您的面相整體呈現「福壽雙全」的格局。</p>
+                    <p>三庭比例均衡，五岳格局協調，五官搭配得宜，氣色紅潤有光澤。</p>
+                    <p>整體格局印象：<strong>福厚貴氣</strong>，具有較強的領導力和人際關係能力。</p>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>綜合評分</h3>
+                    <p>整體面相評分：<span class="analysis-score">86/100</span></p>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: 86%"></div>
+                    </div>
                     
-                    if (width > height) {
-                        if (width > maxSize) {
-                            height *= maxSize / width;
-                            width = maxSize;
-                        }
-                    } else {
-                        if (height > maxSize) {
-                            width *= maxSize / height;
-                            height = maxSize;
-                        }
-                    }
+                    <div class="analysis-indicator">
+                        <div class="indicator-label">事業運：</div>
+                        <div class="indicator-bar">
+                            <div class="indicator-fill" style="width: 88%"></div>
+                        </div>
+                        <div class="indicator-value">88/100</div>
+                    </div>
                     
-                    canvas.width = width;
-                    canvas.height = height;
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(img, 0, 0, width, height);
-                    loadedImage = img;
-                    aiBtn.disabled = false;
+                    <div class="analysis-indicator">
+                        <div class="indicator-label">財運：</div>
+                        <div class="indicator-bar">
+                            <div class="indicator-fill" style="width: 82%"></div>
+                        </div>
+                        <div class="indicator-value">82/100</div>
+                    </div>
                     
-                    // 清除之前的結果
-                    traitList.style.display = 'none';
-                    waitingText.style.display = 'block';
-                    analysisData = {};
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+                    <div class="analysis-indicator">
+                        <div class="indicator-label">健康運：</div>
+                        <div class="indicator-bar">
+                            <div class="indicator-fill" style="width: 85%"></div>
+                        </div>
+                        <div class="indicator-value">85/100</div>
+                    </div>
+                    
+                    <div class="analysis-indicator">
+                        <div class="indicator-label">福壽運：</div>
+                        <div class="indicator-bar">
+                            <div class="indicator-fill" style="width: 90%"></div>
+                        </div>
+                        <div class="indicator-value">90/100</div>
+                    </div>
+                    
+                    <div class="analysis-indicator">
+                        <div class="indicator-label">子女運：</div>
+                        <div class="indicator-bar">
+                            <div class="indicator-fill" style="width: 84%"></div>
+                        </div>
+                        <div class="indicator-value">84/100</div>
+                    </div>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>近期運勢分析</h3>
+                    <p>當前面部氣色紅潤有光澤，額頭明亮，顯示近期事業運勢處於上升期。</p>
+                    <p>鼻頭微顯黃潤，財帛宮豐隆，預示未來三個月有財運機會。</p>
+                    <p>眼下微有青氣，建議注意休息，避免過度勞累。</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="details-tab">
+                <div class="ai-section">
+                    <h3>三庭比例分析</h3>
+                    <p><strong>上庭 (額頭) 評分：<span class="analysis-score">85/100</span></strong></p>
+                    <p>額頭高闊飽滿，髮際線整齊，無明顯疤痕或紋路。此為智慧與早年運勢佳之相。</p>
+                    
+                    <p><strong>中庭 (眉眼鼻) 評分：<span class="analysis-score">88/100</span></strong></p>
+                    <p>眉清目秀，鼻梁高挺，顴骨豐滿有肉但不突出。此相主中年運勢強盛，事業發展順利。</p>
+                    
+                    <p><strong>下庭 (口下巴) 評分：<span class="analysis-score">84/100</span></strong></p>
+                    <p>下巴方圓有肉，人中深長清晰，口型端正。預示晚年福祿雙全，子孫緣佳。</p>
+                    
+                    <p><strong>三庭均衡度：<span class="analysis-score">90/100</span></strong></p>
+                    <p>三庭比例協調，長度接近1:1:1，符合相學中的貴格標準。</p>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>五岳格局分析</h3>
+                    <p><strong>南岳 (額頭)：<span class="analysis-score">86/100</span></strong></p>
+                    <p>寬闊飽滿，氣色紅潤，主智慧與貴人運。</p>
+                    
+                    <p><strong>中岳 (鼻子)：<span class="analysis-score">90/100</span></strong></p>
+                    <p>鼻梁挺拔如嵩山，鼻頭圓潤有肉，鼻翼豐厚，為財運亨通之相。</p>
+                    
+                    <p><strong>北岳 (下巴)：<span class="analysis-score">85/100</span></strong></p>
+                    <p>方圓有勢，主晚年福壽與意志力。</p>
+                    
+                    <p><strong>東西岳 (左右顴骨)：<span class="analysis-score">84/100</span></strong></p>
+                    <p>左右顴骨高度適中，豐滿有肉，與鼻相配得宜，主權力與管理能力。</p>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>五官格局分析</h3>
+                    <p><strong>眉：<span class="analysis-score">87/100</span></strong></p>
+                    <p>眉形清秀如新月，濃淡適宜，眉尾聚而不散，主性情溫和，人緣佳。</p>
+                    
+                    <p><strong>眼：<span class="analysis-score">90/100</span></strong></p>
+                    <p>雙目有神，黑白分明，眼尾微上揚，主智慧與決斷力。</p>
+                    
+                    <p><strong>鼻：<span class="analysis-score">89/100</span></strong></p>
+                    <p>鼻如懸膽，山根高起，準頭豐滿，為財運亨通之相。</p>
+                    
+                    <p><strong>口：<span class="analysis-score">83/100</span></strong></p>
+                    <p>唇色紅潤，嘴角微揚，牙齒整齊，主言而有信，食祿豐厚。</p>
+                    
+                    <p><strong>耳：<span class="analysis-score">85/100</span></strong></p>
+                    <p>耳高於眉，輪廓分明，耳垂厚大，主福壽雙全，智慧超群。</p>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="advice-tab">
+                <div class="ai-section">
+                    <h3>事業運勢建議</h3>
+                    <p>評分：<span class="analysis-score">88/100</span></p>
+                    <p>您的官祿宮(額頭)豐隆寬闊，配合高挺的鼻梁和適中的顴骨，顯示您具有領導才能和管理天賦。</p>
+                    <p><strong>發展建議：</strong></p>
+                    <ul>
+                        <li>適合從事管理、決策類工作，或自主創業</li>
+                        <li>35-50歲為事業黃金期，宜把握重要機會</li>
+                        <li>注意與屬馬、屬狗的人合作，易得貴人相助</li>
+                    </ul>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>財運分析與建議</h3>
+                    <p>評分：<span class="analysis-score">82/100</span></p>
+                    <p>鼻相顯示正財運旺盛，但鼻翼略顯單薄，需注意理財規劃。</p>
+                    <p><strong>理財建議：</strong></p>
+                    <ul>
+                        <li>適合房地產、教育、顧問服務等穩健型投資</li>
+                        <li>避免高風險投機行為，特別是年末三個月</li>
+                        <li>可考慮東南方位的財位布局，增強財運</li>
+                    </ul>
+                </div>
+                
+                <div class="ai-section">
+                    <h3>健康運勢提醒</h3>
+                    <p>評分：<span class="analysis-score">85/100</span></p>
+                    <p>整體體質良好，但眼下微有青氣，需注意肝膽系統。</p>
+                    <p><strong>保健建議：</strong></p>
+                    <ul>
+                        <li>避免熬夜，保證23點前入睡</li>
+                        <li>春季宜多食綠色蔬菜，清肝明目</li>
+                        <li>定期進行有氧運動，增強心肺功能</li>
+                    </ul>
+                </div>
+                
+                <div class="disclaimer">
+                    <p><strong>重要提示：</strong>本分析依據《麻衣神相》傳統面相理論，僅供娛樂參考。人生運勢受個人努力、環境機遇等多種因素影響，請勿過度依賴面相分析。保持積極心態，腳踏實地，才是改變命運的根本之道。</p>
+                </div>
+            </div>
+        </div>
+        <div class="ai-footer">
+            <p>小高的麻衣相法遊戲屋 - AI面相分析系統 | 基於《麻衣神相》傳統面相理論</p>
+        </div>
+    </div>
+</div>
+
+<!-- ---------- 主程式 ---------- -->
+<script>
+/* ==== 取得 DOM ==== */
+const fileInput       = document.getElementById('fileInput');
+const uploadArea      = document.getElementById('uploadArea');
+const imagePreview    = document.getElementById('imagePreview');
+const aiAnalysisBtn   = document.getElementById('aiAnalysisBtn');
+const aiModal         = document.getElementById('aiModal');
+const closeAiModal    = document.getElementById('closeAiModal');
+const tabs            = document.querySelectorAll('.tab');
+const tabContents     = document.querySelectorAll('.tab-content');
+const resultBox       = document.getElementById('resultBox');
+const initialMessage  = document.getElementById('initialMessage');
+const interpretation  = document.getElementById('interpretation');
+const sample1         = document.getElementById('sample1');
+const sample2         = document.getElementById('sample2');
+const sample3         = document.getElementById('sample3');
+const overallScore    = document.getElementById('overallScore');
+const careerScore     = document.getElementById('careerScore');
+const wealthScore     = document.getElementById('wealthScore');
+const healthScore     = document.getElementById('healthScore');
+const overallBar      = document.getElementById('overallBar');
+const careerBar       = document.getElementById('careerBar');
+const wealthBar       = document.getElementById('wealthBar');
+const healthBar       = document.getElementById('healthBar');
+const entertainmentBtn = document.getElementById('entertainmentBtn');
+const entertainmentResult = document.getElementById('entertainmentResult');
+const entertainmentFeatures = document.getElementById('entertainmentFeatures');
+const entertainmentQuote = document.getElementById('entertainmentQuote');
+const entertainmentTags = document.getElementById('entertainmentTags');
+
+/* ==== 全域變數 ==== */
+let imageLoaded = false; // 圖片是否已加載
+
+/* ==== 事件監聽 ==== */
+// 點擊上傳區域觸發文件選擇
+uploadArea.addEventListener('click', () => {
+    fileInput.click();
+});
+
+// 文件選擇事件
+fileInput.addEventListener('change', handleFileSelect);
+
+// 拖放功能
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.style.background = 'rgba(30, 60, 120, 0.5)';
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.style.background = 'rgba(20,40,80,.4)';
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.background = 'rgba(20,40,80,.4)';
+    
+    if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFileSelect(e);
+    }
+});
+
+// AI分析按鈕
+aiAnalysisBtn.addEventListener('click', () => {
+    if (!imageLoaded) {
+        alert('請先上傳面部照片！');
+        return;
+    }
+    
+    // 顯示加載動畫
+    aiModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    
+    // 模擬AI分析過程
+    simulateAnalysis();
+});
+
+// 娛樂面相按鈕
+entertainmentBtn.addEventListener('click', () => {
+    if (!imageLoaded) {
+        alert('請先上傳面部照片！');
+        return;
+    }
+    
+    // 顯示娛樂結果區域
+    entertainmentResult.style.display = 'block';
+    resultBox.style.display = 'none';
+    initialMessage.style.display = 'none';
+    
+    // 顯示加載訊息
+    entertainmentFeatures.innerHTML = "<div style='text-align:center;padding:20px;'>🔮 AI正在生成您的面相劇本...</div>";
+    entertainmentQuote.textContent = "生成中...";
+    entertainmentTags.innerHTML = "";
+    
+    // 延遲生成效果
+    setTimeout(generateEntertainmentReading, 800);
+});
+
+// 關閉AI分析對話框
+closeAiModal.addEventListener('click', () => {
+    aiModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+});
+
+// 點擊對話框外部關閉
+window.addEventListener('click', (e) => {
+    if (e.target === aiModal) {
+        aiModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+});
+
+// 切換標籤
+tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        // 移除所有活動標籤
+        tabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        // 添加當前活動標籤
+        tab.classList.add('active');
+        const tabId = tab.getAttribute('data-tab');
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+    });
+});
+
+// 範例圖片點擊
+sample1.addEventListener('click', () => loadSampleImage('sample1'));
+sample2.addEventListener('click', () => loadSampleImage('sample2'));
+sample3.addEventListener('click', () => loadSampleImage('sample3'));
+
+/* ==== 函數定義 ==== */
+// 處理文件選擇
+function handleFileSelect(e) {
+    const file = fileInput.files[0];
+    if (!file || !file.type.match('image.*')) {
+        alert('請選擇有效的圖片文件！');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        imagePreview.style.display = 'block';
+        imageLoaded = true;
+        aiAnalysisBtn.disabled = false;
+        entertainmentBtn.disabled = false;
+    };
+    reader.readAsDataURL(file);
+}
+
+// 模擬AI分析過程
+function simulateAnalysis() {
+    // 顯示結果區域
+    resultBox.style.display = 'block';
+    initialMessage.style.display = 'none';
+    entertainmentResult.style.display = 'none';
+    
+    // 生成隨機分析結果
+    const overall = 80 + Math.floor(Math.random() * 16);
+    const career = 75 + Math.floor(Math.random() * 21);
+    const wealth = 70 + Math.floor(Math.random() * 26);
+    const health = 85 + Math.floor(Math.random() * 11);
+    
+    // 更新UI
+    overallScore.textContent = `${overall}/100`;
+    careerScore.textContent = `${career}/100`;
+    wealthScore.textContent = `${wealth}/100`;
+    healthScore.textContent = `${health}/100`;
+    
+    // 設置進度條
+    setTimeout(() => {
+        overallBar.style.width = `${overall}%`;
+        careerBar.style.width = `${career}%`;
+        wealthBar.style.width = `${wealth}%`;
+        healthBar.style.width = `${health}%`;
+    }, 100);
+    
+    // 生成解讀
+    generateInterpretation(overall, career, wealth, health);
+}
+
+// 生成面相解讀
+function generateInterpretation(overall, career, wealth, health) {
+    let interpretationHTML = '<h3>面相解讀</h3>';
+    
+    // 整體評價
+    if (overall > 90) {
+        interpretationHTML += `<p>您的面相整體評分極高 (${overall}/100)，呈現出「福祿雙全」的貴格。三庭比例均衡，五官協調，氣色紅潤，顯示您一生運勢順暢，福澤深厚。</p>`;
+    } else if (overall > 80) {
+        interpretationHTML += `<p>您的面相整體評分優秀 (${overall}/100)，呈現出「富貴安康」的格局。三庭比例良好，五官端正，顯示您具有較強的事業發展潛力和良好的人際關係。</p>`;
+    } else if (overall > 70) {
+        interpretationHTML += `<p>您的面相整體評分良好 (${overall}/100)，呈現出「平穩發展」的格局。各方面運勢較為均衡，通過努力可以取得不錯的成就。</p>`;
+    } else {
+        interpretationHTML += `<p>您的面相整體評分尚可 (${overall}/100)，呈現「後天可為」的格局。某些方面可能需要更多努力，但通過後天修養可以改善運勢。</p>`;
+    }
+    
+    // 事業運
+    if (career > 85) {
+        interpretationHTML += `<p><strong>事業運勢極佳 (${career}/100)：</strong>您的官祿宮(額頭)豐隆，鼻梁高挺，顯示您具有卓越的領導能力和事業發展潛力，適合擔任管理職位或自主創業。</p>`;
+    } else if (career > 75) {
+        interpretationHTML += `<p><strong>事業運勢良好 (${career}/100)：</strong>您的事業宮位發展良好，顯示您工作能力強，能夠在職場中穩步發展，取得不錯的成就。</p>`;
+    } else {
+        interpretationHTML += `<p><strong>事業運勢平穩 (${career}/100)：</strong>您的事業發展需要更多主動爭取和規劃，通過堅持和努力可以在職場中獲得成功。</p>`;
+    }
+    
+    // 財富運
+    if (wealth > 80) {
+        interpretationHTML += `<p><strong>財富運勢旺盛 (${wealth}/100)：</strong>您的財帛宮(鼻子)豐隆有肉，顯示正財運強勁，理財能力佳，容易積累財富。</p>`;
+    } else if (wealth > 70) {
+        interpretationHTML += `<p><strong>財富運勢良好 (${wealth}/100)：</strong>您的財運平穩，通過努力工作可以獲得穩定的收入，理財方面需要更多規劃。</p>`;
+    } else {
+        interpretationHTML += `<p><strong>財富運勢需加強 (${wealth}/100)：</strong>您的財運需要更多主動管理和規劃，避免衝動消費，注重長期財富積累。</p>`;
+    }
+    
+    // 健康運
+    if (health > 85) {
+        interpretationHTML += `<p><strong>健康運勢極佳 (${health}/100)：</strong>您的面部氣色紅潤，五官協調，顯示身體素質良好，精力充沛，抵抗力強。</p>`;
+    } else if (health > 75) {
+        interpretationHTML += `<p><strong>健康運勢良好 (${health}/100)：</strong>您的整體健康狀況不錯，但需要注意勞逸結合，保持規律作息。</p>`;
+    } else {
+        interpretationHTML += `<p><strong>健康運勢需關注 (${health}/100)：</strong>您需要更多關注健康問題，特別是飲食和作息習慣，定期體檢。</p>`;
+    }
+    
+    interpretation.innerHTML = interpretationHTML;
+}
+
+// 加載範例圖片
+function loadSampleImage(sampleId) {
+    // 設置對應的範例圖片
+    let sampleSrc = '';
+    switch(sampleId) {
+        case 'sample1':
+            sampleSrc = 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=500&w=500';
+            break;
+        case 'sample2':
+            sampleSrc = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=500&w=500';
+            break;
+        case 'sample3':
+            sampleSrc = 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=500&w=500';
+            break;
+    }
+    
+    // 設置圖片源
+    imagePreview.src = sampleSrc;
+    imagePreview.style.display = 'block';
+    imageLoaded = true;
+    aiAnalysisBtn.disabled = false;
+    entertainmentBtn.disabled = false;
+    
+    alert('範例圖片已加載，請點擊「小高的AI面相分析」按鈕');
+}
+
+// 生成娛樂面相報告
+function generateEntertainmentReading() {
+    // 面相特徵池
+    const features = {
+        forehead: ["天庭飽滿如覆玉，智慧超群顯貴氣", "上庭高廣有貴氣，少年得志展宏圖", "額角崢嶸顯智慧，才思敏捷冠群倫"],
+        eyes: ["鳳目含威藏魄力，決斷果敢顯英明", "龍睛炯炯透機敏，洞察先機識人心", "桃花眼帶三分笑，人緣廣結福運來"],
+        nose: ["鼻如懸膽財庫豐，富貴榮華自天來", "山根貫頂氣勢雄，權柄在握顯威嚴", "鼻翼飽滿聚財帛，理財有方積萬金"],
+        mouth: ["唇若塗朱善言辭，口才便給服眾人", "口如四字掌威權，號令四方顯尊榮", "仰月唇形貴人扶，福祿雙全享安康"],
+        special: ["法令深長號令明，統御有方成大事", "耳垂厚大福壽增，晚運亨通子孫賢", "眉間川字思慮深，謀定後動成偉業"]
+    };
+    
+    // 古籍引文池
+    const quotes = [
+        "《麻衣相法》：'眼如日月要分明，鳳目龍睛切要清'",
+        "《柳莊相法》：'鼻如懸膽身須貴，土曜當生得地來'",
+        "《神相全編》：'天庭飽滿宜早貴，地閣方圓晚運亨'",
+        "《玉管照神局》：'眉清目秀精神足，富貴榮華自天來'",
+        "《太清神鑒》：'口如四字主官貴，唇若塗朱福壽增'"
+    ];
+    
+    // 人生標籤池
+    const tags = ["魄力非凡", "貴人相扶", "晚運亨通", "才思敏捷", 
+                "情路順遂", "財源廣進", "健康長壽", "權柄在握",
+                "智慧超群", "福澤綿長", "人脈金礦", "事業騰達"];
+    
+    // 隨機選擇函數
+    const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    
+    // 隨機選擇3個不重複的標籤
+    const getRandomTags = () => {
+        let result = [];
+        while (result.length < 3) {
+            const tag = tags[Math.floor(Math.random() * tags.length)];
+            if (!result.includes(tag)) result.push(tag);
         }
+        return result;
+    };
+    
+    // 構建特徵文本
+    const foreheadFeature = getRandom(features.forehead);
+    const eyesFeature = getRandom(features.eyes);
+    const noseFeature = getRandom(features.nose);
+    const mouthFeature = getRandom(features.mouth);
+    const specialFeature = getRandom(features.special);
+    
+    // 構建特徵HTML
+    entertainmentFeatures.innerHTML = `
+        <p>額相：${foreheadFeature}</p>
+        <p>眼相：${eyesFeature}</p>
+        <p>鼻相：${noseFeature}</p>
+        <p>唇相：${mouthFeature}</p>
+        <p>特徵：${specialFeature}</p>
+    `;
+    
+    // 構建古籍引文
+    entertainmentQuote.textContent = getRandom(quotes);
+    
+    // 構建標籤
+    const selectedTags = getRandomTags();
+    entertainmentTags.innerHTML = '';
+    selectedTags.forEach(tag => {
+        const tagElement = document.createElement('div');
+        tagElement.className = 'entertainment-tag';
+        tagElement.textContent = `【${tag}】`;
+        entertainmentTags.appendChild(tagElement);
+    });
+}
 
-        // AI分析按鈕
-        aiBtn.addEventListener('click', async () => {
-            if (!loadedImage) return alert('請先上傳圖片');
-            if (!modelsLoaded) {
-                showError('AI模型未載入', '請等待模型載入完成或刷新頁面', '1. 等待幾秒後重試<br>2. 刷新頁面重新加載模型<br>3. 檢查瀏覽器控制台獲取更多信息');
-                return;
-            }
-            
-            // 顯示加載指示器
-            loadingIndicator.style.display = 'block';
-            
-            try {
-                // 使用face-api.js檢測人臉
-                const detections = await faceapi.detectSingleFace(
-                    canvas, 
-                    new faceapi.TinyFaceDetectorOptions()
-                ).withFaceLandmarks();
-                
-                if (!detections) {
-                    loadingIndicator.style.display = 'none';
-                    showError('未檢測到人臉', '請上傳清晰的正面照片', '1. 確保照片中人臉清晰可見<br>2. 嘗試不同角度的照片<br>3. 避免佩戴眼鏡或帽子');
-                    return;
-                }
-                
-                faceDetection = detections;
-                
-                // 繪製人臉網格
-                drawFaceMesh();
-                
-                // 進行面相分析
-                analyzeFacialFeatures();
-                
-                // 顯示分析結果
-                displayAnalysisResults();
-                
-                // 隱藏加載指示器
-                loadingIndicator.style.display = 'none';
-                
-            } catch (error) {
-                console.error('Face detection error:', error);
-                loadingIndicator.style.display = 'none';
-                showError('面相分析失敗', error.message, '1. 刷新頁面後重試<br>2. 使用不同的照片<br>3. 檢查瀏覽器控制台獲取更多信息');
-            }
-        });
+// 分享結果
+function shareResult() {
+    const features = entertainmentFeatures.textContent;
+    const quote = entertainmentQuote.textContent;
+    const tags = Array.from(entertainmentTags.children).map(el => el.textContent).join(' ');
+    
+    const text = `我的AI面相劇本：
+🎭 AI面相劇本生成
+🌜 面相特徵：
+${features}
+📜 古籍佐證：
+"${quote}"
+✨ 人生劇本：
+${tags}
 
-        // 繪製人臉網格
-        function drawFaceMesh() {
-            if (!faceDetection || !loadedImage) return;
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(loadedImage, 0, 0, canvas.width, canvas.height);
-            
-            if (!showMesh) return;
-            
-            const landmarks = faceDetection.landmarks;
-            const points = landmarks.positions;
-            
-            // 繪製臉部輪廓
-            ctx.beginPath();
-            ctx.strokeStyle = '#4f8bf9';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < 17; i++) {
-                const pt = points[i];
-                if (i === 0) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.stroke();
-            
-            // 繪製左眉
-            ctx.beginPath();
-            ctx.strokeStyle = '#ff6b6b';
-            for (let i = 17; i < 22; i++) {
-                const pt = points[i];
-                if (i === 17) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.stroke();
-            
-            // 繪製右眉
-            ctx.beginPath();
-            for (let i = 22; i < 27; i++) {
-                const pt = points[i];
-                if (i === 22) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.stroke();
-            
-            // 繪製鼻子
-            ctx.beginPath();
-            ctx.strokeStyle = '#1dd1a1';
-            for (let i = 27; i < 36; i++) {
-                const pt = points[i];
-                if (i === 27) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.stroke();
-            
-            // 繪製左眼
-            ctx.beginPath();
-            ctx.strokeStyle = '#ff6b6b';
-            for (let i = 36; i < 42; i++) {
-                const pt = points[i];
-                if (i === 36) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.closePath();
-            ctx.stroke();
-            
-            // 繪製右眼
-            ctx.beginPath();
-            for (let i = 42; i < 48; i++) {
-                const pt = points[i];
-                if (i === 42) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.closePath();
-            ctx.stroke();
-            
-            // 繪製嘴唇外輪廓
-            ctx.beginPath();
-            ctx.strokeStyle = '#feca57';
-            for (let i = 48; i < 60; i++) {
-                const pt = points[i];
-                if (i === 48) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.closePath();
-            ctx.stroke();
-            
-            // 繪製嘴唇內輪廓
-            ctx.beginPath();
-            for (let i = 60; i < 68; i++) {
-                const pt = points[i];
-                if (i === 60) ctx.moveTo(pt.x, pt.y);
-                else ctx.lineTo(pt.x, pt.y);
-            }
-            ctx.closePath();
-            ctx.stroke();
-            
-            // 繪製下巴
-            ctx.beginPath();
-            ctx.strokeStyle = '#5f27cd';
-            ctx.moveTo(points[8].x, points[8].y);
-            for (let i = 8; i >= 0; i--) {
-                ctx.lineTo(points[i].x, points[i].y);
-            }
-            ctx.stroke();
-        }
+⚠️ 免責聲明：本分析為AI娛樂生成，無科學依據。相由心生，福自我求。
+`;
+    
+    try {
+        navigator.clipboard.writeText(text);
+        alert('面相劇本已複製！快去貼上分享給朋友吧~');
+    } catch (err) {
+        alert('無法複製文本，請手動複製內容');
+    }
+}
 
-        // 面相分析
-        function analyzeFacialFeatures() {
-            if (!faceDetection) return;
-            
-            const points = faceDetection.landmarks.positions;
-            
-            // 臉型分析
-            const faceWidth = points[16].x - points[0].x;
-            const faceHeight = points[8].y - points[27].y;
-            const faceRatio = faceWidth / faceHeight;
-            
-            if (faceRatio > 0.85) {
-                analysisData.faceShape = '圓臉';
-                analysisData.faceShapeDesc = '圓臉之人通常性格開朗，人際關係良好，容易相處。在麻衣相法中，圓臉代表福氣，晚年運勢較佳。';
-            } else if (faceRatio < 0.7) {
-                analysisData.faceShape = '長臉';
-                analysisData.faceShapeDesc = '長臉之人通常思維敏捷，具有創造力，但容易思慮過多。麻衣相法認為長臉者中年運勢較強。';
-            } else {
-                analysisData.faceShape = '方臉';
-                analysisData.faceShapeDesc = '方臉之人通常性格堅毅，做事有原則，領導能力強。在麻衣相法中，方臉代表事業運勢穩固。';
-            }
-            
-            // 額頭分析
-            const foreheadWidth = points[21].x - points[22].x;
-            const foreheadHeight = points[27].y - points[21].y;
-            const foreheadRatio = foreheadWidth / foreheadHeight;
-            
-            if (foreheadRatio > 1.8) {
-                analysisData.forehead = '寬闊飽滿';
-                analysisData.foreheadDesc = '寬闊飽滿的額頭代表智慧與遠見，麻衣相法認為此乃富貴之相，事業運強，少年得志。';
-            } else if (foreheadRatio < 1.4) {
-                analysisData.forehead = '狹窄';
-                analysisData.foreheadDesc = '額頭較窄者通常早年運勢較弱，但中年後運勢上升。麻衣相法建議此面相者需更加努力。';
-            } else {
-                analysisData.forehead = '適中';
-                analysisData.foreheadDesc = '額頭適中者運勢平穩，智慧與行動力平衡，麻衣相法認為這是穩健發展之相。';
-            }
-            
-            // 眉毛分析
-            const leftEyebrowAngle = calculateAngle(points[17], points[21]);
-            const rightEyebrowAngle = calculateAngle(points[22], points[26]);
-            const avgEyebrowAngle = (leftEyebrowAngle + rightEyebrowAngle) / 2;
-            
-            if (avgEyebrowAngle > 20) {
-                analysisData.eyebrows = '上揚';
-                analysisData.eyebrowsDesc = '眉毛上揚者通常性格積極，行動力強，有領導才能。麻衣相法認為此乃事業成功之相。';
-            } else if (avgEyebrowAngle < 10) {
-                analysisData.eyebrows = '下垂';
-                analysisData.eyebrowsDesc = '眉毛下垂者通常性格溫和，富同情心，人際關係良好。麻衣相法認為此乃人緣旺盛之相。';
-            } else {
-                analysisData.eyebrows = '平直';
-                analysisData.eyebrowsDesc = '眉毛平直者性格穩重，思慮周全，做事有條理。麻衣相法認為此乃穩健發展之相。';
-            }
-            
-            // 眼睛分析
-            const leftEyeWidth = points[39].x - points[36].x;
-            const rightEyeWidth = points[45].x - points[42].x;
-            const avgEyeWidth = (leftEyeWidth + rightEyeWidth) / 2;
-            
-            if (avgEyeWidth > 28) {
-                analysisData.eyes = '大眼';
-                analysisData.eyesDesc = '眼睛大者通常情感豐富，直覺敏銳，具有藝術天分。麻衣相法認為大眼者人緣佳，桃花運旺盛。';
-            } else if (avgEyeWidth < 22) {
-                analysisData.eyes = '小眼';
-                analysisData.eyesDesc = '眼睛小者通常觀察力強，專注力高，做事謹慎。麻衣相法認為小眼者財運穩健，善於理財。';
-            } else {
-                analysisData.eyes = '適中';
-                analysisData.eyesDesc = '眼睛大小適中者性格平衡，待人接物得體。麻衣相法認為此乃平穩發展之相。';
-            }
-            
-            // 鼻子分析
-            const noseWidth = points[35].x - points[31].x;
-            const noseHeight = points[33].y - points[27].y;
-            const noseRatio = noseWidth / noseHeight;
-            
-            if (noseRatio > 0.85) {
-                analysisData.nose = '大鼻';
-                analysisData.noseDesc = '鼻子大者通常意志堅定，執行力強，財運旺盛。麻衣相法認為大鼻乃財富積累之相。';
-            } else if (noseRatio < 0.65) {
-                analysisData.nose = '小鼻';
-                analysisData.noseDesc = '鼻子小者通常心思細膩，善於規劃。麻衣相法認為小鼻者需靠專業技能發展。';
-            } else {
-                analysisData.nose = '適中';
-                analysisData.noseDesc = '鼻子大小適中者理財觀念平衡，事業發展穩健。麻衣相法認為此乃穩健富足之相。';
-            }
-            
-            // 嘴巴分析
-            const mouthWidth = points[54].x - points[48].x;
-            const faceWidthRatio = mouthWidth / faceWidth;
-            
-            if (faceWidthRatio > 0.5) {
-                analysisData.mouth = '大嘴';
-                analysisData.mouthDesc = '嘴巴大者通常表達能力強，社交能力佳，事業發展空間大。麻衣相法認為此乃領導者之相。';
-            } else if (faceWidthRatio < 0.4) {
-                analysisData.mouth = '小嘴';
-                analysisData.mouthDesc = '嘴巴小者通常謹言慎行，專注力高，適合專業領域發展。麻衣相法認為此乃專業人才之相。';
-            } else {
-                analysisData.mouth = '適中';
-                analysisData.mouthDesc = '嘴巴大小適中者表達能力與行動力平衡。麻衣相法認為此乃穩健發展之相。';
-            }
-            
-            // 下巴分析
-            const jawWidth = points[16].x - points[0].x;
-            const jawAngle = calculateAngle(points[3], points[8], points[13]);
-            
-            if (jawAngle > 130) {
-                analysisData.jaw = '圓潤';
-                analysisData.jawDesc = '下巴圓潤者通常性格溫和，晚年運勢佳，家庭生活幸福。麻衣相法認為此乃福氣之相。';
-            } else if (jawAngle < 110) {
-                analysisData.jaw = '方正';
-                analysisData.jawDesc = '下巴方正者通常意志堅定，執行力強，事業成就高。麻衣相法認為此乃事業成功之相。';
-            } else {
-                analysisData.jaw = '適中';
-                analysisData.jawDesc = '下巴線條適中者性格穩健，事業與家庭平衡。麻衣相法認為此乃平穩發展之相。';
-            }
-            
-            // 整體分析
-            analysisData.overall = generateOverallAnalysis();
-        }
-
-        // 計算角度
-        function calculateAngle(p1, p2, p3) {
-            if (!p3) {
-                // 兩點角度
-                return Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
-            }
-            
-            // 三點角度
-            const v1 = { x: p1.x - p2.x, y: p1.y - p2.y };
-            const v2 = { x: p3.x - p2.x, y: p3.y - p2.y };
-            const dot = v1.x * v2.x + v1.y * v2.y;
-            const mag1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
-            const mag2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y);
-            const angle = Math.acos(dot / (mag1 * mag2)) * 180 / Math.PI;
-            return angle;
-        }
-
-        // 生成整體分析
-        function generateOverallAnalysis() {
-            const traits = [
-                analysisData.faceShape,
-                analysisData.forehead,
-                analysisData.eyebrows,
-                analysisData.eyes,
-                analysisData.nose,
-                analysisData.mouth,
-                analysisData.jaw
-            ];
-            
-            const positiveCount = traits.filter(t => 
-                t.includes('寬闊') || t.includes('飽滿') || t.includes('上揚') || 
-                t.includes('大眼') || t.includes('大鼻') || t.includes('圓潤')
-            ).length;
-            
-            if (positiveCount >= 5) {
-                return '上吉之相：綜合分析顯示您面相上佳，具備多項福相特徵，事業、財運、人緣等方面均有良好發展潛力。麻衣相法認為此乃富貴雙全之相。';
-            } else if (positiveCount >= 3) {
-                return '中吉之相：綜合分析顯示您面相良好，主要特徵平衡發展，只要善用優勢，在事業和生活上都能取得不錯成就。';
-            } else {
-                return '平穩之相：綜合分析顯示您面相平穩，雖無特別突出之處，但各方面發展均衡。麻衣相法認為此面相者需專注於專業領域發展。';
-            }
-        }
-
-        // 顯示分析結果
-        function displayAnalysisResults() {
-            waitingText.style.display = 'none';
-            traitList.style.display = 'grid';
-            traitList.innerHTML = '';
-            
-            const traits = [
-                { 
-                    title: '臉型分析', 
-                    icon: 'fas fa-user', 
-                    result: analysisData.faceShape, 
-                    desc: analysisData.faceShapeDesc 
-                },
-                { 
-                    title: '額相分析', 
-                    icon: 'fas fa-brain', 
-                    result: analysisData.forehead, 
-                    desc: analysisData.foreheadDesc 
-                },
-                { 
-                    title: '眉相分析', 
-                    icon: 'fas fa-archway', 
-                    result: analysisData.eyebrows, 
-                    desc: analysisData.eyebrowsDesc 
-                },
-                { 
-                    title: '眼相分析', 
-                    icon: 'fas fa-eye', 
-                    result: analysisData.eyes, 
-                    desc: analysisData.eyesDesc 
-                },
-                { 
-                    title: '鼻相分析', 
-                    icon: 'fas fa-mountain', 
-                    result: analysisData.nose, 
-                    desc: analysisData.noseDesc 
-                },
-                { 
-                    title: '口相分析', 
-                    icon: 'fas fa-comment', 
-                    result: analysisData.mouth, 
-                    desc: analysisData.mouthDesc 
-                },
-                { 
-                    title: '下巴分析', 
-                    icon: 'fas fa-chess-rook', 
-                    result: analysisData.jaw, 
-                    desc: analysisData.jawDesc 
-                },
-                { 
-                    title: '整體分析', 
-                    icon: 'fas fa-star', 
-                    result: '綜合評斷', 
-                    desc: analysisData.overall 
-                }
-            ];
-            
-            traits.forEach(trait => {
-                const card = document.createElement('div');
-                card.className = 'trait-card';
-                card.innerHTML = `
-                    <h4><i class="${trait.icon}"></i> ${trait.title}：${trait.result}</h4>
-                    <p>${trait.desc}</p>
-                `;
-                traitList.appendChild(card);
-            });
-        }
-
-        // 切換網格顯示
-        meshBtn.addEventListener('click', () => {
-            showMesh = !showMesh;
-            meshBtn.innerHTML = showMesh 
-                ? '<i class="fas fa-eye-slash"></i> 隱藏分析網格' 
-                : '<i class="fas fa-eye"></i> 顯示分析網格';
-            drawFaceMesh();
-        });
-
-        // 導出JSON
-        exportBtn.addEventListener('click', () => {
-            if (!analysisData.faceShape) return alert('請先進行面相分析');
-            
-            const dataStr = JSON.stringify(analysisData, null, 2);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = '麻衣相法分析報告.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        });
-    </script>
+// 初始化
+aiAnalysisBtn.disabled = true;
+entertainmentBtn.disabled = true;
+</script>
 </body>
 </html>
