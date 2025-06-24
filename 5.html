@@ -1153,9 +1153,23 @@
       const getX = i => lm[i].x * w;
       
       // 三庭計算 - 使用索引9作為額頭頂部點
-      const yTop = getY(9);          // 額頭頂部（髮際線位置）
-      const yBrow = getY(168);       // 眉毛位置
-      const yNose = getY(2);         // 鼻尖
+const yBrow = getY(168);       // 眉毛位置
+const yNose = getY(2);         // 鼻尖
+const yChin = getY(152);       // 下巴
+
+const midH = Math.abs(yNose - yBrow);
+
+// 推估額頭點位置：從眉毛往上偏移 0.8 倍中庭距離
+const yTop = yBrow - midH * 0.8;
+
+const topH = Math.abs(yBrow - yTop);
+const lowH = Math.abs(yChin - yNose);
+const sum = topH + midH + lowH;
+
+ratioTopEl.textContent = (topH / sum).toFixed(2);
+ratioMidEl.textContent = (midH / sum).toFixed(2);
+ratioLowEl.textContent = (lowH / sum).toFixed(2);
+
       const yChin = getY(152);       // 下巴底部
       
       const topH = Math.abs(yBrow - yTop);
