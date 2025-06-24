@@ -1236,15 +1236,20 @@ ratioLowEl.textContent = (lowH / sum).toFixed(2);
       const w = canvas.width, h = canvas.height;
       const lm = landmarksCache;
       
-      // 額頭點（綠色）
-      const foreheadPoint = lm[9];
-      ctx.fillStyle = '#00ff00';
-      ctx.beginPath();
-      ctx.arc(foreheadPoint.x * w, foreheadPoint.y * h, 8, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.fillStyle = '#000';
-      ctx.font = 'bold 12px sans-serif';
-      ctx.fillText('額頭點(9)', foreheadPoint.x * w + 10, foreheadPoint.y * h);
+     // 使用眉毛點（168）與鼻尖點（2）推估額頭位置
+const browPoint = lm[168];
+const nosePoint = lm[2];
+
+const midH = (nosePoint.y - browPoint.y) * h;
+const yForehead = browPoint.y * h - midH * 0.8;
+const xForehead = browPoint.x * w;
+
+ctx.fillStyle = '#00ff00';
+ctx.beginPath();
+ctx.arc(xForehead, yForehead, 8, 0, 2 * Math.PI);
+ctx.fill();
+ctx.fillText('推估額頭點', xForehead + 10, yForehead);
+
       
       // 眉毛點（橙色）
       const browPoint = lm[168];
