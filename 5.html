@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a2a6c" />
+  <title>小高的麻衣相法遊戲屋 - AI 面相分析</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ===== 通用样式 ===== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #0f1b40, #1a2a6c, #4a235a);
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+      background-attachment: fixed;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: rgba(10, 15, 35, 0.85);
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      border: 1px solid #5d8bf9;
+      padding: 30px;
+      position: relative;
+    }
+    
+    h1 {
+      font-size: 2.8rem;
+      color: #ffcc00;
+      text-align: center;
+      text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #ffcc00, #ff9900);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+    
+    p.subtitle {
+      text-align: center;
+      font-size: 1.2rem;
+      opacity: 0.9;
+      margin: 10px 0 30px;
+      color: #aaccff;
+    }
+    
+    h2.section-title {
+      color: #5d8bf9;
+      margin-bottom: 25px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid rgba(93, 139, 249, 0.5);
+      font-size: 1.8rem;
+      text-align: center;
+      position: relative;
+    }
+    
+    h2.section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(to right, #ffcc00, #ff9900);
+      border-radius: 3px;
+    }
+
+    /* ===== 上傳區 ===== */
+    #uploadArea {
+      border: 3px dashed #5d8bf9;
+      border-radius: 15px;
+      padding: 50px 30px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(20, 40, 80, 0.3);
+      transition: all 0.4s ease;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #uploadArea:hover {
+      background: rgba(30, 60, 120, 0.4);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(93, 139, 249, 0.3);
+    }
+    
+    #uploadArea::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+      transform: rotate(30deg);
+    }
+    
+    #fileInput {
+      display: none;
+    }
+    
+    .upload-icon {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      color: #ffcc00;
+      text-shadow: 0 2px 8px rgba(255, 204, 0, 0.4);
+      transition: transform 0.3s ease;
+    }
+    
+    #uploadArea:hover .upload-icon {
+      transform: scale(1.1);
+    }
+    
+    #uploadArea p {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+    }
+    
+    .note {
+      font-size: 1rem;
+      opacity: 0.8;
+      color: #aaccff;
+    }
+    
+    .forehead-warning {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(255, 100, 100, 0.2);
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 15px;
+      border: 1px solid rgba(255, 100, 100, 0.5);
+    }
+    
+    .forehead-warning i {
+      color: #ff6b6b;
+      font-size: 1.3rem;
+    }
+
+    /* ===== Canvas 與比例卡 ===== */
+    .face-canvas-container {
+      text-align: center;
+      margin: 30px 0;
+      position: relative;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+    
+    #faceCanvas {
+      max-width: 100%;
+      border: 2px solid #5d8bf9;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      display: block;
+      margin: 0 auto;
+    }
+    
+    .ratio-box {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+    }
+    
+    .ratio-card {
+      background: rgba(30, 60, 120, 0.3);
+      border: 1px solid rgba(93, 139, 249, 0.5);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+    
+    .ratio-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(93, 139, 249, 0.3);
+      border-color: #ffcc00;
+    }
+    
+    .ratio-value {
+      font-size: 2.3rem;
+      font-weight: bold;
+      color: #ffcc00;
+      text-shadow: 0 2px 4px rgba(255, 204, 0, 0.3);
+      margin: 10px 0;
+    }
+    
+    .ratio-label {
+      font-size: 1rem;
+      opacity: 0.9;
+      color: #aaccff;
+    }
+
+    /* ===== 進度條結果區 ===== */
+    .result-box {
+      background: rgba(20, 40, 80, 0.4);
+      border-radius: 15px;
+      padding: 25px;
+      margin-top: 30px;
+      border: 2px solid #5d8bf9;
+      backdrop-filter: blur(5px);
+    }
+    
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(93, 139, 249, 0.3);
+      font-size: 1.1rem;
+    }
+    
+    .progress-container {
+      height: 24px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      margin: 12px 0 25px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(to right, #ffcc00, #ff9900);
+      border-radius: 12px;
+      width: 0%;
+      transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, 
+        rgba(255,255,255,0) 0%, 
+        rgba(255,255,255,0.3) 50%, 
+        rgba(255,255,255,0) 100%);
+      animation: shine 2s infinite;
+    }
+    
+    @keyframes shine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* ===== Buttons ===== */
+    .btn-main {
+      background: linear-gradient(to right, #ffcc00, #ff9900);
+      color: #1a1a40;
+      border: none;
+      padding: 16px 35px;
+      font-size: 1.2rem;
+      border-radius: 50px;
+      cursor: pointer;
+      width: 100%;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 6px 18px rgba(255, 153, 0, 0.4);
+      transition: all 0.3s ease;
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .btn-main:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(255, 153, 0, 0.5);
+    }
+    
+    .btn-main:disabled {
+      background: #555;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .btn-group .btn-main {
+      width: auto;
+      flex: 1;
+    }
+
+    /* PWA install */
+    #installBtn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: linear-gradient(to right, #ffcc00, #ff9900);
+      color: #1a1a40;
+      padding: 14px 24px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      display: none;
+      z-index: 99;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      border: none;
+    }
+    
+    #installBtn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(255, 153, 0, 0.5);
+    }
+
+    /* 加載指示器 */
+    .loader {
+      display: none;
+      width: 60px;
+      height: 60px;
+      border: 6px solid rgba(93, 139, 249, 0.3);
+      border-radius: 50%;
+      border-top-color: #5d8bf9;
+      animation: spin 1.2s linear infinite;
+      margin: 30px auto;
+      position: relative;
+    }
+    
+    .loader::after {
+      content: '';
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      right: -6px;
+      bottom: -6px;
+      border: 6px solid transparent;
+      border-radius: 50%;
+      border-top-color: #ffcc00;
+      animation: spin 1.5s linear infinite reverse;
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* 面相分析說明 */
+    .analysis-explanation {
+      margin-top: 30px;
+      padding: 25px;
+      background: rgba(30, 60, 120, 0.3);
+      border-radius: 15px;
+      border: 1px solid #5d8bf9;
+      backdrop-filter: blur(5px);
+    }
+    
+    .analysis-explanation h3 {
+      color: #ffcc00;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      text-align: center;
+      position: relative;
+      padding-bottom: 10px;
+    }
+    
+    .analysis-explanation h3::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(to right, #ffcc00, #ff9900);
+      border-radius: 3px;
+    }
+    
+    .analysis-explanation p {
+      margin-bottom: 15px;
+      font-size: 1.05rem;
+      padding-left: 20px;
+      position: relative;
+    }
+    
+    .analysis-explanation p::before {
+      content: '•';
+      color: #ffcc00;
+      position: absolute;
+      left: 0;
+      font-size: 1.3rem;
+    }
+    
+    .analysis-explanation strong {
+      color: #ffcc00;
+    }
+
+    /* 結果動畫 */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.8s ease forwards;
+    }
+    
+    /* 標記點樣式 */
+    .landmark-point {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ff3366;
+      box-shadow: 0 0 8px rgba(255, 51, 102, 0.8);
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+    
+    /* 參考線樣式 */
+    .reference-line {
+      position: absolute;
+      background: rgba(93, 139, 249, 0.7);
+      z-index: 5;
+    }
+    
+    /* 娛樂面相結果樣式 */
+    .entertainment-result {
+      background: rgba(30, 15, 60, 0.7);
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 20px;
+      border: 2px solid #9c4dff;
+      display: none;
+    }
+    
+    .entertainment-header {
+      color: #ffcc00;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.6rem;
+    }
+    
+    .entertainment-feature {
+      margin: 15px 0;
+      padding: 10px;
+      background: rgba(100, 50, 150, 0.3);
+      border-radius: 10px;
+      border-left: 3px solid #9c4dff;
+    }
+    
+    .entertainment-tags {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .entertainment-tag {
+      background: linear-gradient(to right, #9c4dff, #6a5af9);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    
+    .entertainment-quote {
+      font-style: italic;
+      text-align: center;
+      padding: 15px;
+      background: rgba(255, 215, 0, 0.1);
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 3px solid #ffcc00;
+    }
+    
+    .entertainment-disclaimer {
+      background: rgba(200,0,0,0.1);
+      border: 1px solid rgba(255,0,0,0.3);
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    
+    .entertainment-btn {
+      background: linear-gradient(to right, #9c4dff, #6a5af9);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: 0.3s;
+      display: block;
+      margin: 20px auto;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .entertainment-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
+    
+    /* 優化提示 */
+    .tips-container {
+      background: rgba(30, 60, 120, 0.3);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px 0;
+      border: 1px solid #5d8bf9;
+      backdrop-filter: blur(5px);
+    }
+    
+    .tips-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffcc00;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+    
+    .tip-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+    
+    .tip-item i {
+      color: #ffcc00;
+      min-width: 24px;
+      font-size: 1.2rem;
+    }
+
+    /* 點位說明 */
+    .point-info {
+      background: rgba(30, 60, 120, 0.3);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px 0;
+      border: 1px solid #5d8bf9;
+      backdrop-filter: blur(5px);
+    }
+    
+    .point-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .point-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+    }
+    
+    .point-color {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin: 0 auto 10px;
+    }
+    
+    .point-forehead {
+      background: #00ff00;
+    }
+    
+    .point-eyebrow {
+      background: #ff9900;
+    }
+    
+    .point-nose {
+      background: #ff3366;
+    }
+    
+    .point-chin {
+      background: #9c4dff;
+    }
+
+    /* 響應式設計 */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.2rem;
+      }
+      
+      .container {
+        padding: 20px;
+      }
+      
+      #uploadArea {
+        padding: 30px 15px;
+      }
+      
+      .btn-group {
+        flex-direction: column;
+      }
+      
+      .ratio-box {
+        grid-template-columns: 1fr;
+      }
+      
+      .result-box {
+        padding: 20px;
+      }
+      
+      .analysis-explanation {
+        padding: 20px;
+      }
+      
+      .tips-container, .point-info {
+        padding: 15px;
+      }
+      
+      .point-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      p.subtitle {
+        font-size: 1rem;
+      }
+      
+      .btn-main {
+        padding: 14px 20px;
+        font-size: 1.1rem;
+      }
+      
+      .point-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><i class="fas fa-crown"></i> 小高的麻衣相法遊戲屋</h1>
+    <p class="subtitle">AI 面相分析 - 支援 PWA、FaceMesh 三庭五眼計算</p>
+
+    <!-- ========== 上傳區 ========= -->
+    <div id="uploadArea">
+      <div class="upload-icon"><i class="fas fa-camera"></i></div>
+      <p>點擊或拖放面部照片到這裡</p>
+      <p class="note">(正面清晰照片效果最佳，請確保額頭露出)</p>
+      <div class="forehead-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>重要：額頭必須完整露出才能進行分析</span>
+      </div>
+      <input type="file" accept="image/*" id="fileInput" />
+    </div>
+
+    <div class="loader" id="loader"></div>
+
+    <!-- 額頭檢測提示 -->
+    <div class="tips-container" id="foreheadTips">
+      <div class="tips-header">
+        <i class="fas fa-lightbulb"></i>
+        <h3>額頭檢測提示</h3>
+      </div>
+      <div class="tip-item">
+        <i class="fas fa-check-circle"></i>
+        <div>請確保額頭區域完全露出，不要有劉海遮擋</div>
+      </div>
+      <div class="tip-item">
+        <i class="fas fa-check-circle"></i>
+        <div>保持光線充足，避免陰影遮蓋額頭</div>
+      </div>
+      <div class="tip-item">
+        <i class="fas fa-check-circle"></i>
+        <div>拍攝時請保持頭部正直，不要仰頭或低頭</div>
+      </div>
+      <div class="tip-item">
+        <i class="fas fa-check-circle"></i>
+        <div>避免帽子、頭飾等遮擋物</div>
+      </div>
+    </div>
+
+    <!-- 點位說明 -->
+    <div class="point-info">
+      <div class="tips-header">
+        <i class="fas fa-map-marker-alt"></i>
+        <h3>面部關鍵點說明</h3>
+      </div>
+      <p>為了精確計算三庭比例，我們使用以下面部關鍵點：</p>
+      <div class="point-grid">
+        <div class="point-card">
+          <div class="point-color point-forehead"></div>
+          <div>額頭點 (索引9)</div>
+          <div>髮際線位置</div>
+        </div>
+        <div class="point-card">
+          <div class="point-color point-eyebrow"></div>
+          <div>眉毛點 (索引168)</div>
+          <div>眉毛中心位置</div>
+        </div>
+        <div class="point-card">
+          <div class="point-color point-nose"></div>
+          <div>鼻尖點 (索引2)</div>
+          <div>鼻子最下端</div>
+        </div>
+        <div class="point-card">
+          <div class="point-color point-chin"></div>
+          <div>下巴點 (索引152)</div>
+          <div>下巴最下端</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Canvas + Ratio -->
+    <div class="face-canvas-container">
+      <canvas id="faceCanvas" width="500" height="500"></canvas>
+    </div>
+
+    <div class="ratio-box">
+      <div class="ratio-card fade-in">
+        <div class="ratio-label">上庭比例</div>
+        <div id="ratioTop" class="ratio-value">--</div>
+        <div class="ratio-label">(額頭)</div>
+      </div>
+      <div class="ratio-card fade-in">
+        <div class="ratio-label">中庭比例</div>
+        <div id="ratioMid" class="ratio-value">--</div>
+        <div class="ratio-label">(眉毛到鼻尖)</div>
+      </div>
+      <div class="ratio-card fade-in">
+        <div class="ratio-label">下庭比例</div>
+        <div id="ratioLow" class="ratio-value">--</div>
+        <div class="ratio-label">(鼻尖到下巴)</div>
+      </div>
+      <div class="ratio-card fade-in">
+        <div class="ratio-label">五眼比例</div>
+        <div id="ratioFiveEye" class="ratio-value">--</div>
+        <div class="ratio-label">(臉寬/眼寬)</div>
+      </div>
+    </div>
+
+    <!-- 主操作按鈕 -->
+    <button id="analyzeBtn" class="btn-main" disabled>
+      <i class="fas fa-search"></i> 分析面相
+    </button>
+    
+    <div class="btn-group">
+      <button id="cameraBtn" class="btn-main">
+        <i class="fas fa-camera"></i> 使用相機拍攝
+      </button>
+      <button id="resetBtn" class="btn-main">
+        <i class="fas fa-redo"></i> 重置分析
+      </button>
+    </div>
+
+    <!-- 新增娛樂面相按鈕 -->
+    <button id="entertainmentBtn" class="entertainment-btn">
+      <i class="fas fa-theater-masks"></i> 生成娛樂面相劇本
+    </button>
+
+    <!-- ========== 分數結果簡版 ========= -->
+    <div class="result-box" id="scoreBox" style="display:none;">
+      <h2 class="section-title">面相分析結果</h2>
+      
+      <div class="result-item fade-in">
+        <span><i class="fas fa-star"></i> 整體格局評價</span>
+        <span id="overallScore">--</span>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" id="overallBar"></div>
+      </div>
+      
+      <div class="result-item fade-in">
+        <span><i class="fas fa-briefcase"></i> 事業運勢</span>
+        <span id="careerScore">--</span>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" id="careerBar"></div>
+      </div>
+      
+      <div class="result-item fade-in">
+        <span><i class="fas fa-money-bill-wave"></i> 財富運勢</span>
+        <span id="wealthScore">--</span>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" id="wealthBar"></div>
+      </div>
+      
+      <div class="result-item fade-in">
+        <span><i class="fas fa-heartbeat"></i> 健康運勢</span>
+        <span id="healthScore">--</span>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar" id="healthBar"></div>
+      </div>
+    </div>
+    
+    <!-- 面相分析說明 -->
+    <div class="analysis-explanation">
+      <h3><i class="fas fa-lightbulb"></i> 面相學知識說明</h3>
+      <p><strong>三庭比例：</strong> 上庭(額頭)、中庭(眉毛到鼻尖)、下庭(鼻尖到下巴)的理想比例是1:1:1</p>
+      <p><strong>五眼比例：</strong> 臉部寬度應等於五隻眼睛的寬度，理想值為5.0左右</p>
+      <p><strong>額頭：</strong> 高而寬闊的額頭代表智慧和事業運</p>
+      <p><strong>鼻子：</strong> 挺直的鼻子代表財運和領導力</p>
+      <p><strong>下巴：</strong> 圓潤的下巴代表財富和晚年運勢</p>
+      <p><strong>眼睛：</strong> 明亮有神的眼睛代表健康和活力</p>
+    </div>
+    
+    <!-- 娛樂面相結果區域 -->
+    <div class="entertainment-result" id="entertainmentResult">
+      <div class="entertainment-header">🎭 AI面相劇本生成</div>
+      
+      <div class="entertainment-feature">
+        <h3>🌜 您的面相特徵</h3>
+        <p id="entertainmentFeatures">特徵生成中...</p>
+      </div>
+      
+      <div class="entertainment-quote" id="entertainmentQuote">
+        "古籍引文生成中..."
+      </div>
+      
+      <div class="entertainment-tags" id="entertainmentTags">
+        <!-- 標籤將由JS動態生成 -->
+      </div>
+      
+      <div class="entertainment-disclaimer">
+        ⚠️ 免責聲明：本分析為AI娛樂生成，無科學依據。相由心生，福自我求。
+      </div>
+      
+      <button class="entertainment-btn" onclick="generateEntertainmentReading()">
+        <i class="fas fa-sync"></i> 重新生成劇本
+      </button>
+      <button class="entertainment-btn" onclick="shareResult()">
+        <i class="fas fa-share-alt"></i> 分享我的面相劇本
+      </button>
+    </div>
+  </div>
+
+  <!-- PWA Install Btn -->
+  <div id="installBtn"><i class="fas fa-mobile-alt"></i> 安裝為應用</div>
+
+  <script>
+    // ======== PWA Install ========
+    let deferredPrompt = null;
+    const installBtn = document.getElementById('installBtn');
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+    });
+    
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      }
+      deferredPrompt = null;
+      installBtn.style.display = 'none';
+    });
+
+    // ======== DOM ========
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const loader = document.getElementById('loader');
+    const canvas = document.getElementById('faceCanvas');
+    const ctx = canvas.getContext('2d');
+    const ratioTopEl = document.getElementById('ratioTop');
+    const ratioMidEl = document.getElementById('ratioMid');
+    const ratioLowEl = document.getElementById('ratioLow');
+    const ratioFiveEyeEl = document.getElementById('ratioFiveEye');
+    const entertainmentBtn = document.getElementById('entertainmentBtn');
+    const entertainmentResult = document.getElementById('entertainmentResult');
+    const entertainmentFeatures = document.getElementById('entertainmentFeatures');
+    const entertainmentQuote = document.getElementById('entertainmentQuote');
+    const entertainmentTags = document.getElementById('entertainmentTags');
+
+    // Score elements
+    const scoreBox = document.getElementById('scoreBox');
+    const overallScore = document.getElementById('overallScore');
+    const careerScore = document.getElementById('careerScore');
+    const wealthScore = document.getElementById('wealthScore');
+    const healthScore = document.getElementById('healthScore');
+    const overallBar = document.getElementById('overallBar');
+    const careerBar = document.getElementById('careerBar');
+    const wealthBar = document.getElementById('wealthBar');
+    const healthBar = document.getElementById('healthBar');
+
+    // ======== 狀態 ========
+    let loadedImg = null;
+    let landmarksCache = null;
+    let stream = null;
+    let faceMesh = null;
+    let isCameraMode = false;
+
+    // ======== 初始化 FaceMesh ========
+    async function initFaceMesh() {
+      // 使用正確的CDN路徑
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js';
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+      
+      await new Promise((resolve) => {
+        script.onload = resolve;
+      });
+      
+      // 初始化FaceMesh
+      faceMesh = new FaceMesh({
+        locateFile: (file) => {
+          return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+        }
+      });
+      
+      faceMesh.setOptions({
+        maxNumFaces: 1,
+        refineLandmarks: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+      });
+      
+      faceMesh.onResults(handleFaceMeshResults);
+      
+      console.log('FaceMesh initialized successfully');
+    }
+
+    // 初始化 FaceMesh
+    initFaceMesh().catch(err => {
+      console.error('初始化 FaceMesh 失敗:', err);
+      alert('無法初始化面部識別功能，請檢查網路連線');
+    });
+
+    // ======== 事件 ========
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', e => {
+      e.preventDefault();
+      uploadArea.style.background = 'rgba(40, 80, 160, 0.4)';
+    });
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.background = 'rgba(20, 40, 80, 0.3)';
+    });
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadArea.style.background = 'rgba(20, 40, 80, 0.3)';
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFile();
+      }
+    });
+    fileInput.addEventListener('change', handleFile);
+    analyzeBtn.addEventListener('click', analyzeFace);
+    cameraBtn.addEventListener('click', openCamera);
+    resetBtn.addEventListener('click', resetAnalysis);
+    entertainmentBtn.addEventListener('click', showEntertainmentResult);
+
+    // ======== 文件處理 ========
+    function handleFile() {
+      const file = fileInput.files[0];
+      if (!file || !file.type.match('image.*')) {
+        alert('請選擇有效的圖片');
+        return;
+      }
+      
+      // 停止相機流
+      stopCameraStream();
+      isCameraMode = false;
+      
+      const img = new Image();
+      img.onload = () => {
+        // 調整 canvas 大小，保持最大邊 500
+        const max = 500;
+        const ratio = Math.min(max / img.width, max / img.height, 1);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        loadedImg = img;
+        analyzeBtn.disabled = false;
+        entertainmentBtn.disabled = false;
+        
+        // 運行 FaceMesh
+        runFaceMesh(img);
+      };
+      img.src = URL.createObjectURL(file);
+    }
+
+    // ======== 相機功能 ========
+    async function openCamera() {
+      try {
+        // 停止現有流
+        stopCameraStream();
+        
+        // 重置 canvas
+        resetCanvas();
+        isCameraMode = true;
+        
+        // 請求相機權限
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'user',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
+        });
+        
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+          video.play();
+          
+          // 設置 canvas 尺寸
+          const max = 500;
+          const ratio = Math.min(max / video.videoWidth, max / video.videoHeight, 1);
+          canvas.width = video.videoWidth * ratio;
+          canvas.height = video.videoHeight * ratio;
+          
+          // 繪製視頻幀到 canvas
+          const drawFrame = () => {
+            if (!stream) return;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // 實時運行FaceMesh
+            if (faceMesh && isCameraMode) {
+              faceMesh.send({image: canvas})
+                .catch(err => console.error('FaceMesh error:', err));
+            }
+            
+            requestAnimationFrame(drawFrame);
+          };
+          drawFrame();
+          
+          // 啟用分析按鈕
+          analyzeBtn.disabled = false;
+          entertainmentBtn.disabled = false;
+          loadedImg = video;
+        };
+      } catch (err) {
+        console.error('相機錯誤:', err);
+        alert('無法訪問相機，請確保已授予權限');
+      }
+    }
+    
+    function stopCameraStream() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+    }
+
+    // ======== FaceMesh ========
+    async function runFaceMesh(img) {
+      if (!faceMesh) {
+        alert('面部識別功能尚未初始化');
+        return;
+      }
+      
+      loader.style.display = 'block';
+      analyzeBtn.disabled = true;
+      entertainmentBtn.disabled = true;
+      
+      try {
+        const off = document.createElement('canvas');
+        off.width = img.width || img.videoWidth;
+        off.height = img.height || img.videoHeight;
+        const offCtx = off.getContext('2d');
+        offCtx.drawImage(img, 0, 0, off.width, off.height);
+        await faceMesh.send({image: off});
+      } catch (err) {
+        console.error('FaceMesh 處理錯誤:', err);
+        alert('面部識別處理失敗');
+      } finally {
+        loader.style.display = 'none';
+        analyzeBtn.disabled = false;
+        entertainmentBtn.disabled = false;
+      }
+    }
+
+    function handleFaceMeshResults(res) {
+      if (!res.multiFaceLandmarks || !res.multiFaceLandmarks.length) {
+        if (!isCameraMode) {
+          alert('未檢測到面部，請上傳清晰的正面照片');
+        }
+        return;
+      }
+      
+      landmarksCache = res.multiFaceLandmarks[0];
+      
+      // 檢查額頭關鍵點（索引9）是否存在
+      if (!landmarksCache[9]) {
+        if (!isCameraMode) {
+          alert('無法檢測到額頭區域，請確保額頭完整露出且光線充足');
+          resetRatiosDisplay();
+        }
+        return;
+      }
+      
+      // 額頭點可見性檢查（y值過小表示額頭可能被截斷）
+      const foreheadPoint = landmarksCache[9];
+      if (foreheadPoint.y < 0.1) {
+        if (!isCameraMode) {
+          alert('額頭區域不完整，請確保照片包含完整額頭');
+          resetRatiosDisplay();
+        }
+        return;
+      }
+      
+      // 更新比例顯示
+      calcRatios(landmarksCache);
+
+      // 如果是相機模式，繪製網格
+      if (isCameraMode) {
+        drawMesh();
+      }
+    }
+
+    // ======== 計算比例 ========
+    function calcRatios(lm) {
+      const w = canvas.width, h = canvas.height;
+      const getY = i => lm[i].y * h;
+      const getX = i => lm[i].x * w;
+      
+      // 三庭計算 - 使用索引9作為額頭頂部點
+      const yTop = getY(9);          // 額頭頂部（髮際線位置）
+      const yBrow = getY(168);       // 眉毛位置
+      const yNose = getY(2);         // 鼻尖
+      const yChin = getY(152);       // 下巴底部
+      
+      const topH = Math.abs(yBrow - yTop);
+      const midH = Math.abs(yNose - yBrow);
+      const lowH = Math.abs(yChin - yNose);
+      const sum = topH + midH + lowH;
+      
+      ratioTopEl.textContent = (topH/sum).toFixed(2);
+      ratioMidEl.textContent = (midH/sum).toFixed(2);
+      ratioLowEl.textContent = (lowH/sum).toFixed(2);
+      
+      // 五眼計算
+      const faceW = Math.abs(getX(454) - getX(234));  // 臉部寬度
+      const eyeW = Math.abs(getX(133) - getX(33));    // 眼睛寬度
+      
+      if (eyeW > 0) {
+        ratioFiveEyeEl.textContent = (faceW/eyeW).toFixed(2);
+      } else {
+        ratioFiveEyeEl.textContent = '--';
+      }
+    }
+    
+    function resetRatiosDisplay() {
+      ratioTopEl.textContent = '--';
+      ratioMidEl.textContent = '--';
+      ratioLowEl.textContent = '--';
+      ratioFiveEyeEl.textContent = '--';
+    }
+
+    // ======== 分析面相 ========
+    function analyzeFace() {
+      if (!landmarksCache) {
+        alert('請先上傳或拍攝面部照片');
+        return;
+      }
+      
+      drawMeshAndScores();
+    }
+    
+    // ======== 繪圖與分數 ========
+    function drawMesh() {
+      if (!loadedImg || !landmarksCache) return;
+      
+      // 重新繪製圖像
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(loadedImg, 0, 0, canvas.width, canvas.height);
+      
+      // 繪製面部關鍵點
+      ctx.fillStyle = '#ff3366';
+      landmarksCache.forEach(pt => {
+        ctx.beginPath();
+        ctx.arc(pt.x * canvas.width, pt.y * canvas.height, 3, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+      
+      // 繪製三庭五眼參考線
+      drawReferenceLines();
+      
+      // 特別標記關鍵點
+      drawKeyPoints();
+    }
+    
+    function drawKeyPoints() {
+      const w = canvas.width, h = canvas.height;
+      const lm = landmarksCache;
+      
+      // 額頭點（綠色）
+      const foreheadPoint = lm[9];
+      ctx.fillStyle = '#00ff00';
+      ctx.beginPath();
+      ctx.arc(foreheadPoint.x * w, foreheadPoint.y * h, 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('額頭點(9)', foreheadPoint.x * w + 10, foreheadPoint.y * h);
+      
+      // 眉毛點（橙色）
+      const browPoint = lm[168];
+      ctx.fillStyle = '#ff9900';
+      ctx.beginPath();
+      ctx.arc(browPoint.x * w, browPoint.y * h, 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.fillText('眉毛點(168)', browPoint.x * w + 10, browPoint.y * h);
+      
+      // 鼻尖點（紅色）
+      const nosePoint = lm[2];
+      ctx.fillStyle = '#ff3366';
+      ctx.beginPath();
+      ctx.arc(nosePoint.x * w, nosePoint.y * h, 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.fillText('鼻尖點(2)', nosePoint.x * w + 10, nosePoint.y * h);
+      
+      // 下巴點（紫色）
+      const chinPoint = lm[152];
+      ctx.fillStyle = '#9c4dff';
+      ctx.beginPath();
+      ctx.arc(chinPoint.x * w, chinPoint.y * h, 8, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.fillText('下巴點(152)', chinPoint.x * w + 10, chinPoint.y * h);
+    }
+    
+    function drawMeshAndScores() {
+      drawMesh();
+      
+      // 產生分數
+      generateFaceScores();
+      
+      // 顯示結果
+      scoreBox.style.display = 'block';
+      entertainmentResult.style.display = 'none';
+      
+      // 觸發動畫
+      document.querySelectorAll('.fade-in').forEach(el => {
+        el.style.animation = 'fadeIn 0.8s ease forwards';
+      });
+    }
+    
+    function drawReferenceLines() {
+      const w = canvas.width, h = canvas.height;
+      const lm = landmarksCache;
+      const getY = i => lm[i].y * h;
+      const getX = i => lm[i].x * w;
+      
+      ctx.strokeStyle = '#5d8bf9';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      
+      // 三庭水平線 - 使用索引9作為額頭頂部
+      ctx.moveTo(0, getY(9));
+      ctx.lineTo(w, getY(9));
+      
+      ctx.moveTo(0, getY(168));
+      ctx.lineTo(w, getY(168));
+      
+      ctx.moveTo(0, getY(2));
+      ctx.lineTo(w, getY(2));
+      
+      ctx.moveTo(0, getY(152));
+      ctx.lineTo(w, getY(152));
+      
+      // 五眼垂直線
+      const eyePoints = [33, 133, 263, 362, 454];
+      eyePoints.forEach(i => {
+        ctx.moveTo(getX(i), 0);
+        ctx.lineTo(getX(i), h);
+      });
+      
+      ctx.stroke();
+    }
+    
+    function generateFaceScores() {
+      // 基於三庭五眼比例生成分數
+      const topRatio = parseFloat(ratioTopEl.textContent) || 0.33;
+      const midRatio = parseFloat(ratioMidEl.textContent) || 0.33;
+      const lowRatio = parseFloat(ratioLowEl.textContent) || 0.33;
+      const eyeRatio = parseFloat(ratioFiveEyeEl.textContent) || 5.0;
+      
+      // 整體分數計算
+      const overall = Math.min(98, Math.floor(
+        70 + 
+        (1 - Math.abs(topRatio - 0.33)) * 15 + 
+        (1 - Math.abs(midRatio - 0.33)) * 15 + 
+        (1 - Math.abs(lowRatio - 0.33)) * 15 +
+        (1 - Math.abs(eyeRatio - 5.0)/2) * 15
+      ));
+      
+      // 各項分數（基於不同面相特徵）
+      const career = Math.min(97, Math.floor(
+        overall * 0.75 + 
+        topRatio * 15 +  // 額頭代表事業
+        Math.random() * 8
+      ));
+      
+      const wealth = Math.min(96, Math.floor(
+        overall * 0.7 + 
+        lowRatio * 20 +  // 下巴代表財富
+        Math.random() * 10
+      ));
+      
+      const health = Math.min(95, Math.floor(
+        overall * 0.85 + 
+        midRatio * 15 +  // 中庭代表健康
+        Math.random() * 8
+      ));
+      
+      // 更新分數顯示
+      overallScore.textContent = `${overall}/100`;
+      careerScore.textContent = `${career}/100`;
+      wealthScore.textContent = `${wealth}/100`;
+      healthScore.textContent = `${health}/100`;
+      
+      // 動畫顯示進度條
+      setTimeout(() => {
+        overallBar.style.width = `${overall}%`;
+        careerBar.style.width = `${career}%`;
+        wealthBar.style.width = `${wealth}%`;
+        healthBar.style.width = `${health}%`;
+      }, 100);
+    }
+
+    // ======== 娛樂面相功能 ========
+    function showEntertainmentResult() {
+      if (!landmarksCache) {
+        alert('請先上傳或拍攝面部照片');
+        return;
+      }
+      
+      // 隱藏標準結果，顯示娛樂結果
+      scoreBox.style.display = 'none';
+      entertainmentResult.style.display = 'block';
+      
+      // 生成娛樂面相劇本
+      generateEntertainmentReading();
+    }
+    
+    function generateEntertainmentReading() {
+      // 面相特徵池
+      const features = {
+        forehead: ["天庭飽滿如覆玉，智慧超群顯貴氣", "上庭高廣有貴氣，少年得志展宏圖", "額角崢嶸顯智慧，才思敏捷冠群倫"],
+        eyes: ["鳳目含威藏魄力，決斷果敢顯英明", "龍睛炯炯透機敏，洞察先機識人心", "桃花眼帶三分笑，人緣廣結福運來"],
+        nose: ["鼻如懸膽財庫豐，富貴榮華自天來", "山根貫頂氣勢雄，權柄在握顯威嚴", "鼻翼飽滿聚財帛，理財有方積萬金"],
+        mouth: ["唇若塗朱善言辭，口才便給服眾人", "口如四字掌威權，號令四方顯尊榮", "仰月唇形貴人扶，福祿雙全享安康"],
+        special: ["法令深長號令明，統御有方成大事", "耳垂厚大福壽增，晚運亨通子孫賢", "眉間川字思慮深，謀定後動成偉業"]
+      };
+      
+      // 古籍引文池
+      const quotes = [
+        "《麻衣相法》：'眼如日月要分明，鳳目龍睛切要清'",
+        "《柳莊相法》：'鼻如懸膽身須貴，土曜當生得地來'",
+        "《神相全編》：'天庭飽滿宜早貴，地閣方圓晚運亨'",
+        "《玉管照神局》：'眉清目秀精神足，富貴榮華自天來'",
+        "《太清神鑒》：'口如四字主官貴，唇若塗朱福壽增'"
+      ];
+      
+      // 人生標籤池
+      const tags = ["魄力非凡", "貴人相扶", "晚運亨通", "才思敏捷", 
+                  "情路順遂", "財源廣進", "健康長壽", "權柄在握",
+                  "智慧超群", "福澤綿長", "人脈金礦", "事業騰達"];
+      
+      // 隨機選擇函數
+      const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+      
+      // 隨機選擇3個不重複的標籤
+      const getRandomTags = () => {
+        let result = [];
+        while (result.length < 3) {
+          const tag = tags[Math.floor(Math.random() * tags.length)];
+          if (!result.includes(tag)) result.push(tag);
+        }
+        return result;
+      };
+      
+      // 構建特徵文本
+      const foreheadFeature = getRandom(features.forehead);
+      const eyesFeature = getRandom(features.eyes);
+      const noseFeature = getRandom(features.nose);
+      const mouthFeature = getRandom(features.mouth);
+      const specialFeature = getRandom(features.special);
+      
+      // 構建特徵HTML
+      entertainmentFeatures.innerHTML = `
+          <p>額相：${foreheadFeature}</p>
+          <p>眼相：${eyesFeature}</p>
+          <p>鼻相：${noseFeature}</p>
+          <p>唇相：${mouthFeature}</p>
+          <p>特徵：${specialFeature}</p>
+      `;
+      
+      // 構建古籍引文
+      entertainmentQuote.textContent = getRandom(quotes);
+      
+      // 構建標籤
+      const selectedTags = getRandomTags();
+      entertainmentTags.innerHTML = '';
+      selectedTags.forEach(tag => {
+          const tagElement = document.createElement('div');
+          tagElement.className = 'entertainment-tag';
+          tagElement.textContent = `【${tag}】`;
+          entertainmentTags.appendChild(tagElement);
+      });
+    }
+    
+    function shareResult() {
+      const features = entertainmentFeatures.textContent;
+      const quote = entertainmentQuote.textContent;
+      const tags = Array.from(entertainmentTags.children).map(el => el.textContent).join(' ');
+      
+      const text = `我的AI面相劇本：
+🎭 AI面相劇本生成
+🌜 面相特徵：
+${features}
+📜 古籍佐證：
+"${quote}"
+✨ 人生劇本：
+${tags}
+
+⚠️ 免責聲明：本分析為AI娛樂生成，無科學依據。相由心生，福自我求。
+`;
+      
+      try {
+        navigator.clipboard.writeText(text);
+        alert('面相劇本已複製！快去貼上分享給朋友吧~');
+      } catch (err) {
+        alert('無法複製文本，請手動複製內容');
+      }
+    }
+
+    // ======== 重置功能 ========
+    function resetAnalysis() {
+      // 停止相機流
+      stopCameraStream();
+      isCameraMode = false;
+      
+      // 重置狀態
+      loadedImg = null;
+      landmarksCache = null;
+      fileInput.value = '';
+      
+      // 重置 UI
+      resetCanvas();
+      resetRatiosDisplay();
+      scoreBox.style.display = 'none';
+      entertainmentResult.style.display = 'none';
+      analyzeBtn.disabled = true;
+      entertainmentBtn.disabled = true;
+      
+      // 重置進度條
+      overallBar.style.width = '0%';
+      careerBar.style.width = '0%';
+      wealthBar.style.width = '0%';
+      healthBar.style.width = '0%';
+    }
+    
+    function resetCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('請上傳或拍攝面部照片', canvas.width/2, canvas.height/2);
+      
+      // 繪製相機圖標
+      ctx.font = '60px FontAwesome';
+      ctx.fillText('\uf030', canvas.width/2, canvas.height/2 - 50);
+    }
+
+    // 初始重置 canvas
+    resetCanvas();
+
+    // ======== Service Worker ========
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .catch(err => console.log('Service Worker 註冊失敗:', err));
+    }
+  </script>
+</body>
+</html>
