@@ -1069,55 +1069,62 @@
     }
     
     function generateFaceScores() {
-      // 基於三庭五眼比例生成分數
-      const topRatio = parseFloat(ratioTopEl.textContent) || 0.33;
-      const midRatio = parseFloat(ratioMidEl.textContent) || 0.33;
-      const lowRatio = parseFloat(ratioLowEl.textContent) || 0.33;
-      const eyeRatio = parseFloat(ratioFiveEyeEl.textContent) || 5.0;
-      
-      // 整體分數計算
-      const overall = Math.min(98, Math.floor(
-        70 + 
-        (1 - Math.abs(topRatio - 0.33)) * 15 + 
-        (1 - Math.abs(midRatio - 0.33)) * 15 + 
-        (1 - Math.abs(lowRatio - 0.33)) * 15 +
-        (1 - Math.abs(eyeRatio - 5.0)/2) * 15
-      ));
-      
-      // 各項分數（基於不同面相特徵）
-      const career = Math.min(97, Math.floor(
-        overall * 0.75 + 
-        topRatio * 15 +  // 額頭代表事業
-        Math.random() * 8
-      ));
-      
-      const wealth = Math.min(96, Math.floor(
-        overall * 0.7 + 
-        lowRatio * 20 +  // 下巴代表財富
-        Math.random() * 10
-      ));
-      
-      const health = Math.min(95, Math.floor(
-        overall * 0.85 + 
-        midRatio * 15 +  // 中庭代表健康
-        Math.random() * 8
-      ));
-      
-      // 更新分數顯示
-      overallScore.textContent = `${overall}/100`;
-      careerScore.textContent = `${career}/100`;
-      wealthScore.textContent = `${wealth}/100`;
-      healthScore.textContent = `${health}/100`;
-      
-      // 動畫顯示進度條
-      setTimeout(() => {
-        overallBar.style.width = `${overall}%`;
-        careerBar.style.width = `${career}%`;
-        wealthBar.style.width = `${wealth}%`;
-        healthBar.style.width = `${health}%`;
-      }, 100);
-    }
-
+  // 基於三庭五眼比例生成分數
+  const topRatio = parseFloat(ratioTopEl.textContent) || 0.33;
+  const midRatio = parseFloat(ratioMidEl.textContent) || 0.33;
+  const lowRatio = parseFloat(ratioLowEl.textContent) || 0.33;
+  const eyeRatio = parseFloat(ratioFiveEyeEl.textContent) || 5.0;
+  
+  // 计算各项偏差（距离理想值的差距）
+  const topDeviation = Math.abs(topRatio - 0.33);
+  const midDeviation = Math.abs(midRatio - 0.33);
+  const lowDeviation = Math.abs(lowRatio - 0.33);
+  const eyeDeviation = Math.abs(eyeRatio - 5.0) / 2;
+  
+  // 整体格局评价 - 更合理的计算方式
+  const overall = Math.min(100, Math.floor(
+    70 + 
+    (1 - Math.min(topDeviation, 0.2)) * 10 + 
+    (1 - Math.min(midDeviation, 0.2)) * 10 + 
+    (1 - Math.min(lowDeviation, 0.2)) * 10 +
+    (1 - Math.min(eyeDeviation, 1.0)) * 10
+  ));
+  
+  // 各項分數（基於不同面相特徵）
+  const career = Math.min(100, Math.floor(
+    overall * 0.6 + 
+    (1 - topDeviation) * 25 +  // 額頭代表事業
+    Math.random() * 5
+  ));
+  
+  const wealth = Math.min(100, Math.floor(
+    overall * 0.5 + 
+    (1 - lowDeviation) * 30 +  // 下巴代表財富
+    (1 - midDeviation) * 10 +  // 鼻子也影响财富
+    Math.random() * 5
+  ));
+  
+  const health = Math.min(100, Math.floor(
+    overall * 0.5 + 
+    (1 - eyeDeviation) * 25 +  // 眼睛代表健康
+    (1 - midDeviation) * 15 +  // 中庭也影响健康
+    Math.random() * 5
+  ));
+  
+  // 更新分數顯示
+  overallScore.textContent = `${overall}/100`;
+  careerScore.textContent = `${career}/100`;
+  wealthScore.textContent = `${wealth}/100`;
+  healthScore.textContent = `${health}/100`;
+  
+  // 動畫顯示進度條
+  setTimeout(() => {
+    overallBar.style.width = `${overall}%`;
+    careerBar.style.width = `${career}%`;
+    wealthBar.style.width = `${wealth}%`;
+    healthBar.style.width = `${health}%`;
+  }, 100);
+}
     // ======== 娛樂面相功能 ========
     function showEntertainmentResult() {
       if (!landmarksCache) {
