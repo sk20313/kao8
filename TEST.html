@@ -384,6 +384,42 @@
             font-size: 0.95rem;
         }
         
+        .error-box {
+            background: rgba(178, 34, 34, 0.2);
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .error-title {
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .solution-box {
+            background: rgba(29, 209, 161, 0.2);
+            border: 1px solid #1dd1a1;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .solution-title {
+            color: #1dd1a1;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: column;
@@ -422,6 +458,16 @@
                     <p>點擊或拖放正面清晰的面部照片到這裡</p>
                     <p class="small">(建議使用光線良好的正面照片)</p>
                     <input type="file" id="fileInput" accept="image/*" hidden />
+                </div>
+                
+                <div class="error-box" id="errorBox">
+                    <div class="error-title"><i class="fas fa-exclamation-triangle"></i> 分析失敗原因</div>
+                    <p id="errorMessage">模型加載失敗，請檢查網絡連接或刷新頁面重試</p>
+                </div>
+                
+                <div class="solution-box" id="solutionBox">
+                    <div class="solution-title"><i class="fas fa-lightbulb"></i> 解決方案</div>
+                    <p id="solutionMessage">1. 確保您的設備已連接網絡<br>2. 刷新頁面重新加載模型<br>3. 使用Chrome或Firefox瀏覽器</p>
                 </div>
                 
                 <div class="instructions">
@@ -508,11 +554,16 @@
         const traitList = document.getElementById('traitList');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const waitingText = analysisResult.querySelector('.waiting-text');
+        const errorBox = document.getElementById('errorBox');
+        const errorMessage = document.getElementById('errorMessage');
+        const solutionBox = document.getElementById('solutionBox');
+        const solutionMessage = document.getElementById('solutionMessage');
 
         // 全局變量
         let loadedImage = null;
         let faceDetection = null;
         let showMesh = true;
+        let modelsLoaded = false;
         let analysisData = {
             faceShape: '',
             forehead: '',
@@ -527,16 +578,32 @@
         // 初始化face-api.js模型
         async function initFaceAPI() {
             try {
+                // 使用正確的模型路徑
                 await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights'),
-                    faceapi.nets.faceLandmark68Net.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights'),
-                    faceapi.nets.faceExpressionNet.loadFromUri('https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights')
+                    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+                    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+                    faceapi.nets.faceExpressionNet.loadFromUri('/models')
                 ]);
                 console.log('FaceAPI models loaded');
+                modelsLoaded = true;
             } catch (e) {
                 console.error('Error loading FaceAPI models:', e);
-                alert('無法載入AI模型，請刷新頁面重試');
+                showError('模型加載失敗', '請檢查網絡連接或刷新頁面重試');
             }
+        }
+
+        // 顯示錯誤信息
+        function showError(title, message, solution) {
+            errorMessage.innerHTML = `<strong>${title}:</strong> ${message}`;
+            solutionMessage.innerHTML = solution || '請嘗試刷新頁面或稍後再試';
+            errorBox.style.display = 'block';
+            solutionBox.style.display = 'block';
+        }
+
+        // 隱藏錯誤信息
+        function hideError() {
+            errorBox.style.display = 'none';
+            solutionBox.style.display = 'none';
         }
 
         // 初始化
@@ -567,6 +634,7 @@
         });
 
         function handleFile() {
+            hideError();
             const file = fileInput.files[0];
             if (!file || !file.type.match('image.*')) return alert('請選擇有效的圖片檔');
             
@@ -611,6 +679,10 @@
         // AI分析按鈕
         aiBtn.addEventListener('click', async () => {
             if (!loadedImage) return alert('請先上傳圖片');
+            if (!modelsLoaded) {
+                showError('AI模型未載入', '請等待模型載入完成或刷新頁面', '1. 等待幾秒後重試<br>2. 刷新頁面重新加載模型<br>3. 檢查瀏覽器控制台獲取更多信息');
+                return;
+            }
             
             // 顯示加載指示器
             loadingIndicator.style.display = 'block';
@@ -624,7 +696,8 @@
                 
                 if (!detections) {
                     loadingIndicator.style.display = 'none';
-                    return alert('未檢測到人臉，請上傳清晰的正面照片');
+                    showError('未檢測到人臉', '請上傳清晰的正面照片', '1. 確保照片中人臉清晰可見<br>2. 嘗試不同角度的照片<br>3. 避免佩戴眼鏡或帽子');
+                    return;
                 }
                 
                 faceDetection = detections;
@@ -644,7 +717,7 @@
             } catch (error) {
                 console.error('Face detection error:', error);
                 loadingIndicator.style.display = 'none';
-                alert('面相分析失敗，請重試');
+                showError('面相分析失敗', error.message, '1. 刷新頁面後重試<br>2. 使用不同的照片<br>3. 檢查瀏覽器控制台獲取更多信息');
             }
         });
 
