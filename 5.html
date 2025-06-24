@@ -1315,7 +1315,8 @@ ctx.strokeStyle = '#00ff00';
 ctx.lineWidth = 2;
 ctx.beginPath();
 ctx.moveTo(0, foreheadY);
-ctx.lineTo(w, foreheadY);
+ctx.lineTo(canvas.width, foreheadY);
+
 ctx.stroke();
 ctx.fillText('推估額頭線', 10, foreheadY - 5);
 
